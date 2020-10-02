@@ -2,14 +2,13 @@ name: .NET Core
 
 on:
   push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+    paths-ignore: 
+    - 'doc/**'
 
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
     - uses: actions/checkout@v2
@@ -17,9 +16,13 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 3.1.301
-    - name: Install dependencies
-      run: dotnet restore
-    - name: Build
-      run: dotnet build --configuration Release --no-restore
+    - name: Install dependencies BusinessLayer
+      run: dotnet restore src/BusinessLayer/BusinessLayer.csproj
+    - name: Install dependencies UI
+      run: dotnet restore src/Battleships/Battleships.csproj      
+    - name: Build BusinessLayer
+      run: dotnet build src/BusinessLayer/BusinessLayer.csproj --configuration Release --no-restore
+    - name: Build UI
+      run: dotnet build src/Battleships/Battleships.csproj --configuration Release --no-restore
     - name: Test
-      run: dotnet test --no-restore --verbosity normal
+      run: dotnet test src/Battleships/Battleships.csproj --no-restore --verbosity normal
