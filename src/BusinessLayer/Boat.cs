@@ -71,6 +71,7 @@ namespace BusinessLayer
             byte difference;
             byte start;
             byte end;
+            Position pos;
 
             if (startPos > endPos)
             {
@@ -90,14 +91,13 @@ namespace BusinessLayer
             {
                 if (isXAxis)
                 {
-                    Position pos = new Position(staticAxis, (byte)(end + i));
-                    this.BoatBits.Add(new BoatBit(pos));
+                    pos = new Position(staticAxis, (byte)(end + i));
                 }
                 else
                 {
-                    Position pos = new Position((byte)(end + i), staticAxis);
-                    this.BoatBits.Add(new BoatBit(pos));
+                    pos = new Position((byte)(end + i), staticAxis);
                 }
+                this.BoatBits.Add(new BoatBit(pos));
             }
         }
     }
