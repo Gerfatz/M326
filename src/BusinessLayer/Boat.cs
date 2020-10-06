@@ -38,15 +38,17 @@ namespace BusinessLayer
         /// <param name="startPos">Start position of the boat</param>
         /// <param name="endPos">End position of the boat</param>
         /// <returns>Returns the created boat</returns>
-        public Boat CreateBoat(Position startPos, Position endPos)
+        public static Boat CreateBoat(Position startPos, Position endPos)
         {
+            Boat boat = new Boat();
+
             if (startPos.X == endPos.X)
             {
-                CreateBoatBits(startPos.Y, endPos.Y, endPos.X, true);
+                boat.CreateBoatBits(startPos.Y, endPos.Y, endPos.X, true);
             }
             else if (startPos.Y == endPos.Y)
             {
-                CreateBoatBits(startPos.X, endPos.X, endPos.Y, false);
+                boat.CreateBoatBits(startPos.X, endPos.X, endPos.Y, false);
             }
             else
             {
@@ -54,7 +56,7 @@ namespace BusinessLayer
             }
 
 
-            return this;
+            return boat;
         }
 
         /// <summary>
