@@ -57,21 +57,28 @@ namespace BusinessLayer
             return this;
         }
 
-        private void CreateBoatBits(byte startCord, byte endCord, byte staticAxis, bool isXAxis)
+        /// <summary>
+        /// Creates the bits between two points on a given axis.
+        /// </summary>
+        /// <param name="startPos">First given position on axis</param>
+        /// <param name="endPos">Last given position on axis</param>
+        /// <param name="staticAxis">Common axis position</param>
+        /// <param name="isXAxis">To Check if position is on the X axis</param>
+        private void CreateBoatBits(byte startPos, byte endPos, byte staticAxis, bool isXAxis)
         {
             byte difference;
             byte start;
             byte end;
 
-            if (startCord > endCord)
+            if (startPos > endPos)
             {
-                start = startCord;
-                end = endCord;
+                start = startPos;
+                end = endPos;
             }
             else
             {
-                start = endCord;
-                end = startCord;
+                start = endPos;
+                end = startPos;
             }
 
 
