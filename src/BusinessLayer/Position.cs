@@ -4,6 +4,7 @@ using System.Text;
 
 namespace BusinessLayer
 {
+    [Serializable]
     public struct Position
     {
         // Properties

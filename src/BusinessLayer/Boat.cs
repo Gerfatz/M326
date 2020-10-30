@@ -5,6 +5,7 @@ using System.Text;
 
 namespace BusinessLayer
 {
+    [Serializable]
     public class Boat
     {
         // Properties
