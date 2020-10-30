@@ -128,6 +128,11 @@ namespace BusinessLayer.Storage
         {
             string pathToFile = Path.Combine(PathToApplicationData, dictionaryFileName);
 
+            if (!File.Exists(pathToFile))
+            {
+                File.Create(pathToFile).Close();
+            }
+
             Dictionary<Guid, string> fields = JsonConvert.DeserializeObject<Dictionary<Guid, string>>(File.ReadAllText(pathToFile)) ?? new Dictionary<Guid, string>();
 
             if(name == null)
