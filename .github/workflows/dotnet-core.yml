@@ -25,4 +25,4 @@ jobs:
     - name: Build UI
       run: dotnet build src/Battleships/Battleships.csproj --configuration Release --no-restore
     - name: Test
-      run: dotnet test src/Battleships/Battleships.csproj --no-restore --verbosity normal
+      run: dotnet test src/Tests/Tests.csproj --no-restore --verbosity normal

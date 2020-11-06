@@ -5,6 +5,7 @@ using BusinessLayer;
 
 namespace BusinessLayer
 {
+    [Serializable]
     public class Field
     {
         // Properties

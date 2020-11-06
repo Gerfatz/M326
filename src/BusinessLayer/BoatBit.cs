@@ -2,6 +2,7 @@
 
 namespace BusinessLayer
 {
+    [Serializable]
     public class BoatBit
     {
         // Properties
