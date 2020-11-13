@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Dynamic;
+using System.Linq;
 using System.Text;
 
 namespace BusinessLayer
@@ -14,7 +15,7 @@ namespace BusinessLayer
         // Constructor
         private Boat()
         {
-            
+            BoatBits = new List<BoatBit>();
         }
 
         // Methods
@@ -23,15 +24,8 @@ namespace BusinessLayer
         /// Checks if all boatsBits were found.
         /// </summary>
         /// <returns>Returns true when it was completely found, false if at least one bit has yet to be found.</returns>
-        public bool WasFound()
-        {
-            foreach (BoatBit bit in this.BoatBits)
-            {
-                if (bit.WasFound == false)
-                    return false;
-            }
-            return true;
-        }
+        public bool WasFound => BoatBits.All(bb => bb.WasFound);
+
 
         /// <summary>
         /// Creates a new boat from two points on the field
@@ -98,7 +92,7 @@ namespace BusinessLayer
                 {
                     pos = new Position((byte)(end + i), staticAxis);
                 }
-                this.BoatBits.Add(new BoatBit(pos));
+                BoatBits.Add(new BoatBit(pos));
             }
         }
     }

@@ -29,7 +29,7 @@ namespace Tests
             Field saved = fieldsaver.GetField(id);
 
             Assert.AreEqual(field.Name, saved.Name);
-            Assert.AreEqual(field.GetSideLength(), saved.GetSideLength());
+            Assert.AreEqual(field.SideLength, saved.SideLength);
         }
 
         [Test]
