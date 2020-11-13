@@ -9,7 +9,7 @@ namespace BusinessLayer
     public class Field
     {
         // Properties
-        public List<Boat> Boats { get; set; }
+        private List<Boat> _boats { get; set; }
         public string Name { get; set; }
 
         // Attributes
@@ -18,7 +18,8 @@ namespace BusinessLayer
         // Constructor
         public Field(int sideLength)
         {
-            this._sideLength = sideLength;
+            _sideLength = sideLength;
+            _boats = new List<Boat>();
         }
 
         // Methods
@@ -36,20 +37,12 @@ namespace BusinessLayer
             if (boat == null)
                 return false;
 
-            Boats.Add(boat);
+            _boats.Add(boat);
             return true;
         }
 
-        public int GetSideLength()
-        {
-            return this._sideLength;
-        }
+        public int SideLength => _sideLength;
 
-        public List<Boat> GetBoats()
-        {
-            return this.Boats;
-        }
-
-
+        public List<Boat> Boats => _boats;
     }
 }
