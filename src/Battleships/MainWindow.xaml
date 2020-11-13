@@ -5,8 +5,45 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Battleships"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
+        Title="Battleship sudoku" Height="500" Width="900">
 
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Styles/MainStyle.xaml"></ResourceDictionary>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="300"/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+
+        <StackPanel>
+            <Label Content="Options"/>
+            <Button Name="CreateButton" Content="Create game" Margin="0 1"/>
+            <Button Name="GenerateButton" Content="Generate game"/>
+            <Separator Margin="2 5 2 20"/>
+            <Button Name="SaveButton" Content="Save game" Margin="0 1"/>
+            <Button Name="LoadButton" Content="Load game"/>
+
+        </StackPanel>
+        <StackPanel  Grid.Row="1">
+            <UniformGrid Columns="2">
+                <TextBlock Text="Field size:"/>
+                <TextBox x:Name="FieldSizeBox" TextChanged="FieldSizeBox_TextChanged"/>
+            </UniformGrid>
+        </StackPanel>
+
+        <StackPanel Grid.Column="1">
+            <Label Content="Playing field"/>
+            <UniformGrid x:Name="PlayingFieldGrid" Margin="5" Height="400" Width="400"/>
+        </StackPanel>
     </Grid>
 </Window>

@@ -20,9 +20,47 @@ namespace Battleships
     /// </summary>
     public partial class MainWindow : Window
     {
+        private int _fieldSize = 5;
+
         public MainWindow()
         {
             InitializeComponent();
+            FieldSizeBox.Text = "5";
+            GeneratePlayingField();
+        }
+
+        private void FieldSizeBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            string sizeText = FieldSizeBox.Text;
+            if (int.TryParse(sizeText, out _fieldSize))
+            {
+                FieldSizeBox.Foreground = Brushes.Black;
+                GeneratePlayingField();
+            }
+            else
+            {
+                FieldSizeBox.Foreground = Brushes.Red;
+            }
+        }
+        
+        private void GeneratePlayingField()
+        {
+            PlayingFieldGrid.Children.Clear();
+            PlayingFieldGrid.Columns = _fieldSize;
+            PlayingFieldGrid.Rows = _fieldSize;
+
+            int fieldAmnt = _fieldSize * _fieldSize;
+
+            for (int i = 0; i < fieldAmnt; i++)
+            {
+                Button button = new Button
+                {
+                    Background = Brushes.Black,
+                    Content = "i",
+                    Height = Width
+                };
+                PlayingFieldGrid.Children.Add(button);
+            }
         }
     }
 }
