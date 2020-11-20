@@ -92,7 +92,7 @@ namespace BusinessLayer
                 {
                     pos = new Position((byte)(end + i), staticAxis);
                 }
-                BoatBits.Add(new BoatBit(pos));
+                BoatBits.Add(new BoatBit(pos, this));
             }
         }
     }

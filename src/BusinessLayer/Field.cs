@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using BusinessLayer;
 
@@ -44,5 +45,15 @@ namespace BusinessLayer
         public int SideLength => _sideLength;
 
         public List<Boat> Boats => _boats;
+
+        public int GetNumOfBoatsInRow(int row)
+        {
+            return _boats.SelectMany(b => b.BoatBits).Count(bb => bb.XYPosition.Y == row);
+        }
+
+        public int GetNumOfBoatsInColumn(int col)
+        {
+            return _boats.SelectMany(b => b.BoatBits).Count(bb => bb.XYPosition.X == col);
+        }
     }
 }
