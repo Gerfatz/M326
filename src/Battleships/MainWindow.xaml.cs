@@ -12,6 +12,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Battleships.ViewModels;
+using BusinessLayer;
 
 namespace Battleships
 {
@@ -20,46 +22,80 @@ namespace Battleships
     /// </summary>
     public partial class MainWindow : Window
     {
-        private int _fieldSize = 5;
+        public PlayingFieldViewModel PlayingField { get; set; }
+        private bool _btnToggleOn = false;
+        private Button _selectBtn;
+        private Position _btnPos;
 
         public MainWindow()
         {
             InitializeComponent();
+            PlayingField = new PlayingFieldViewModel();
             FieldSizeBox.Text = "5";
+            PlayingField.Field = new Field(5);
             GeneratePlayingField();
         }
 
         private void FieldSizeBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             string sizeText = FieldSizeBox.Text;
-            if (int.TryParse(sizeText, out _fieldSize))
+            int numOut;
+            if (int.TryParse(sizeText, out numOut) && numOut <= 30)
             {
+                PlayingField.Field = new Field(numOut);
+
                 FieldSizeBox.Foreground = Brushes.Black;
                 GeneratePlayingField();
+                GC.Collect();
             }
             else
             {
                 FieldSizeBox.Foreground = Brushes.Red;
             }
         }
+
+        private void FieldBtn_Click(Position position, Field field, object sender, RoutedEventArgs e)
+        {
+            Button button = (Button)sender;
+            if (_btnToggleOn == false)
+            {
+                _btnToggleOn = true;
+                _selectBtn = button;
+                _btnPos = position;
+                button.Background = Brushes.LightBlue;
+            }
+            else
+            {
+                _btnToggleOn = false;
+                button.Background = Brushes.LightBlue;
+            }
+        }
         
         private void GeneratePlayingField()
         {
+            int fieldSize = PlayingField.Field.SideLength;
+
             PlayingFieldGrid.Children.Clear();
-            PlayingFieldGrid.Columns = _fieldSize;
-            PlayingFieldGrid.Rows = _fieldSize;
+            PlayingFieldGrid.Columns = fieldSize;
+            PlayingFieldGrid.Rows = fieldSize;
 
-            int fieldAmnt = _fieldSize * _fieldSize;
+            int fieldAmnt = fieldSize * fieldSize;
 
-            for (int i = 0; i < fieldAmnt; i++)
+            for (byte y = 0; y < fieldSize; y++)
             {
-                Button button = new Button
+                for (byte x = 0; x < fieldSize; x++)
                 {
-                    Background = Brushes.Black,
-                    Content = "i",
-                    Height = Width
-                };
-                PlayingFieldGrid.Children.Add(button);
+                    Button button = new Button
+                    {
+                        Background = Brushes.Black,
+                        Content = "i",
+                        Height = Width,
+                        Margin = new Thickness(1)
+                    };
+                    PlayingFieldGrid.Children.Add(button);
+                    Position pos = new Position(x, y);
+                    button.Click += (s, e) => FieldBtn_Click(pos, PlayingField.Field, s, e);
+                }
             }
         }
     }

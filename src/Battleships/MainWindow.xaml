@@ -5,9 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Battleships"
         mc:Ignorable="d"
-        Title="Battleship sudoku" Height="500" Width="900">
+        Title="Battleship Sudoku" Height="510" Width="900">
 
-    <!--
+    
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -15,7 +15,7 @@
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Window.Resources>
--->
+
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="300"/>
@@ -26,23 +26,23 @@
             <RowDefinition/>
         </Grid.RowDefinitions>
 
-        <StackPanel>
+        <StackPanel Background="#1E88E5">
             <Label Content="Options"/>
-            <Button Name="CreateButton" Content="Create game" Margin="0 1"/>
-            <Button Name="GenerateButton" Content="Generate game"/>
-            <Separator Margin="2 5 2 20"/>
-            <Button Name="SaveButton" Content="Save game" Margin="0 1"/>
-            <Button Name="LoadButton" Content="Load game"/>
+            <Button Name="CreateButton" Content="Create game" Margin="2 1"/>
+            <Button Name="GenerateButton" Content="Generate game" Margin="2 0"/>
+            <Separator Margin="2 5 2 20" Background="DarkGray"/>
+            <Button Name="SaveButton" Content="Save game" Margin="2 1"/>
+            <Button Name="LoadButton" Content="Load game" Margin="2 0"/>
 
         </StackPanel>
-        <StackPanel  Grid.Row="1">
-            <UniformGrid Columns="2">
+        <StackPanel  Grid.Row="1" Background="#1E88E5">
+            <UniformGrid Columns="2" Margin="2 0">
                 <TextBlock Text="Field size:"/>
                 <TextBox x:Name="FieldSizeBox" TextChanged="FieldSizeBox_TextChanged"/>
             </UniformGrid>
         </StackPanel>
 
-        <StackPanel Grid.Column="1" Grid.RowSpan="2">
+        <StackPanel Grid.Column="1" Grid.RowSpan="2" Background="#90CAF9">
             <Label Content="Playing field"/>
             <UniformGrid x:Name="PlayingFieldGrid" Margin="5" Height="400" Width="400"/>
         </StackPanel>
