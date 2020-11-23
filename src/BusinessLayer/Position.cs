@@ -9,11 +9,11 @@ namespace BusinessLayer
     public struct Position : IEquatable<Position>
     {
         // Properties
-        public byte X { get; set; }
-        public byte Y { get; set; }
+        public sbyte X { get; set; }
+        public sbyte Y { get; set; }
 
         // Constructor
-        public Position(byte x, byte y)
+        public Position(sbyte x, sbyte y)
         {
             this.X = x;
             this.Y = y;

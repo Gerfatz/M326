@@ -83,9 +83,9 @@ namespace Battleships
 
             int fieldAmnt = fieldSize * fieldSize;
 
-            for (byte y = 0; y < fieldSize; y++)
+            for (sbyte y = 0; y < fieldSize; y++)
             {
-                for (byte x = 0; x < fieldSize; x++)
+                for (sbyte x = 0; x < fieldSize; x++)
                 {
                     Button button = new Button
                     {
