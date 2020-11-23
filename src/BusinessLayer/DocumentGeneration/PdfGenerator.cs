@@ -15,7 +15,6 @@ namespace BusinessLayer.DocumentGeneration
 {
     public static class PdfGenerator
     {
-
         public static void Generate(string file, Field field)
         {
             using PdfWriter writer = new PdfWriter(file);
@@ -40,12 +39,15 @@ namespace BusinessLayer.DocumentGeneration
                     }
                     table.AddCell(cell);
                 }
+
+                //Number of Boats in the row.
                 Cell boatcount = new Cell();
                 boatcount.SetWidth(30);
                 boatcount.Add(GetParagraph(field.GetNumOfBoatsInRow(i)));
                 table.AddCell(boatcount);
             }
 
+            //Number of boats in a column
             for (int i = 0; i < field.SideLength; i++)
             {
                 Cell cell = new Cell();
@@ -53,11 +55,40 @@ namespace BusinessLayer.DocumentGeneration
                 table.AddCell(cell);
             }
 
+            table.SetMarginBottom(30);
+
             doc.Add(table);
+
+            RenderBoatList(doc, field.Boats);
 
             doc.Close();
             pdf.Close();
             writer.Close();
+        }
+
+        private static void RenderBoatList(Document doc, List<Boat> boats)
+        {
+            foreach(Boat boat in boats.OrderBy(b => b.BoatBits.Count))
+            {
+                Paragraph boatParagraph = new Paragraph();
+                if(boat.BoatBits.Count == 1)
+                {
+                    boatParagraph.Add(GetImage(BoatTile.Single));
+                }
+                else
+                {
+                    boatParagraph.Add(GetImage(BoatTile.Left));
+                    
+                    for(int i = 0; i < boat.BoatBits.Count - 2; i++)
+                    {
+                        boatParagraph.Add(GetImage(BoatTile.Center));
+                    }
+
+                    boatParagraph.Add(GetImage(BoatTile.Right));
+                }
+
+                doc.Add(boatParagraph);
+            }
         }
 
         private static Paragraph GetParagraph(object text)

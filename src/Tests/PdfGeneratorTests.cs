@@ -22,6 +22,8 @@ namespace Tests
             field.CreateBoat(new Position(3, 3), new Position(3, 5));
             field.CreateBoat(new Position(0, 1), new Position(1, 1));
             field.CreateBoat(new Position(5, 6), new Position(5, 6));
+            field.CreateBoat(new Position(5, 0), new Position(5, 3));
+            field.CreateBoat(new Position(3, 1), new Position(3, 1));
 
             PdfGenerator.Generate(path, field);
 
