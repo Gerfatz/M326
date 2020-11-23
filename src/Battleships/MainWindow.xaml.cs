@@ -69,7 +69,7 @@ namespace Battleships
             {
                 _btnToggleOn = true;
                 _btnPos = position;
-                button.Background = Brushes.Black;
+                button.Background = Brushes.Gray;
             }
         }
         
