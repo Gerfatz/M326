@@ -24,7 +24,6 @@ namespace Battleships
     {
         public PlayingFieldViewModel PlayingField { get; set; }
         private bool _btnToggleOn = false;
-        private Button _selectBtn;
         private Position _btnPos;
 
         public MainWindow()
@@ -56,18 +55,21 @@ namespace Battleships
 
         private void FieldBtn_Click(Position position, Field field, object sender, RoutedEventArgs e)
         {
+            
             Button button = (Button)sender;
-            if (_btnToggleOn == false)
+            if (_btnToggleOn)
             {
-                _btnToggleOn = true;
-                _selectBtn = button;
-                _btnPos = position;
-                button.Background = Brushes.LightBlue;
+                _btnToggleOn = false;
+                button.Background = Brushes.Black;
+
+                PlayingField.Field.CreateBoat(_btnPos, position);
+                GeneratePlayingField();
             }
             else
             {
-                _btnToggleOn = false;
-                button.Background = Brushes.LightBlue;
+                _btnToggleOn = true;
+                _btnPos = position;
+                button.Background = Brushes.Black;
             }
         }
         
@@ -87,13 +89,20 @@ namespace Battleships
                 {
                     Button button = new Button
                     {
-                        Background = Brushes.Black,
+                        Background = Brushes.Blue,
                         Content = "i",
                         Height = Width,
                         Margin = new Thickness(1)
                     };
-                    PlayingFieldGrid.Children.Add(button);
+
+
                     Position pos = new Position(x, y);
+                    if (PlayingField.Field.Boats.Any(x => x.BoatBits.Any(x => x.XYPosition == pos)))
+                    {
+                        button.Background = Brushes.Black;
+                    }
+
+                    PlayingFieldGrid.Children.Add(button);
                     button.Click += (s, e) => FieldBtn_Click(pos, PlayingField.Field, s, e);
                 }
             }
