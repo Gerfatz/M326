@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using BusinessLayer;
 
@@ -46,28 +47,25 @@ namespace BusinessLayer
             List<Position> boatPositions = new List<Position>();
             foreach (BoatBit boatBit in boat.BoatBits)
             {
-                for (int Y = -1; Y <= 1; Y++)
+                for (int y = -1; y <= 1; y++)
                 {
-                    for (int X = -1; X <= 1; X++)
+                    for (int x = -1; x <= 1; x++)
                     {
-                        sbyte posX = Convert.ToSByte(boatBit.XYPosition.X + X);
-                        sbyte posY = Convert.ToSByte(boatBit.XYPosition.Y + Y);
+                        sbyte posX = Convert.ToSByte(boatBit.XYPosition.X + x);
+                        sbyte posY = Convert.ToSByte(boatBit.XYPosition.Y + y);
                         Position position = new Position(posX, posY);
                         boatPositions.Add(position);
                     }
                 }
             }
 
-            foreach (Boat loopBoat in _boats)
+            foreach (BoatBit boatBit in _boats.SelectMany(b => b.BoatBits))
             {
-                foreach (BoatBit boatBit in loopBoat.BoatBits)
-                {
-                    Position bitPos = boatBit.XYPosition;
-                    Position pos = boatPositions.Find(x => x.X == bitPos.X && x.Y == bitPos.Y);
+                Position bitPos = boatBit.XYPosition;
+                Position pos = boatPositions.Find(x => x.X == bitPos.X && x.Y == bitPos.Y);
                     
-                    if (boatPositions.Exists(x => x.X == bitPos.X && x.Y == bitPos.Y))
-                        return false;
-                }
+                if (boatPositions.Exists(x => x.X == bitPos.X && x.Y == bitPos.Y))
+                    return false;
             }
 
             return true;

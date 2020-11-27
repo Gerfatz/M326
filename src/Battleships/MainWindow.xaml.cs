@@ -45,6 +45,7 @@ namespace Battleships
 
                 FieldSizeBox.Foreground = Brushes.Black;
                 GeneratePlayingField();
+                PlayingField.Field.Boats.Clear();
                 GC.Collect();
             }
             else
