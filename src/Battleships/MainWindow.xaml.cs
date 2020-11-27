@@ -30,8 +30,9 @@ namespace Battleships
         {
             InitializeComponent();
             PlayingField = new PlayingFieldViewModel();
-            FieldSizeBox.Text = "5";
-            PlayingField.Field = new Field(5);
+            FieldSizeBox.Text = "7";
+            PlayingField.Field = new Field(7);
+            DataContext = PlayingField;
             GeneratePlayingField();
         }
 
@@ -39,7 +40,7 @@ namespace Battleships
         {
             string sizeText = FieldSizeBox.Text;
             int numOut;
-            if (int.TryParse(sizeText, out numOut) && numOut <= 30)
+            if (int.TryParse(sizeText, out numOut) && numOut <= 20 && numOut >= 5)
             {
                 PlayingField.Field = new Field(numOut);
 
@@ -56,22 +57,30 @@ namespace Battleships
 
         private void FieldBtn_Click(Position position, Field field, object sender, RoutedEventArgs e)
         {
-            
-            Button button = (Button)sender;
-            if (_btnToggleOn)
+            if (PlayingField.ButtonState == true)
             {
-                _btnToggleOn = false;
-                button.Background = Brushes.Black;
-
-                PlayingField.Field.CreateBoat(_btnPos, position);
+                PlayingField.Field.DeleteBoat(position);
                 GeneratePlayingField();
             }
             else
             {
-                _btnToggleOn = true;
-                _btnPos = position;
-                button.Background = Brushes.Gray;
+                Button button = (Button)sender;
+                if (_btnToggleOn)
+                {
+                    _btnToggleOn = false;
+                    button.Background = Brushes.Black;
+
+                    PlayingField.Field.CreateBoat(_btnPos, position);
+                    GeneratePlayingField();
+                }
+                else
+                {
+                    _btnToggleOn = true;
+                    _btnPos = position;
+                    button.Background = Brushes.Gray;
+                }
             }
+            
         }
         
         private void GeneratePlayingField()
@@ -107,6 +116,11 @@ namespace Battleships
                     button.Click += (s, e) => FieldBtn_Click(pos, PlayingField.Field, s, e);
                 }
             }
+        }
+
+        private void CreateButton_Click(object sender, RoutedEventArgs e)
+        {
+            PlayingField.EditorMode = false;
         }
     }
 }

@@ -42,7 +42,7 @@ namespace BusinessLayer
             return true;
         }
 
-        public bool ValidateBoatPos(Boat boat)
+        private bool ValidateBoatPos(Boat boat)
         {
             List<Position> boatPositions = new List<Position>();
             foreach (BoatBit boatBit in boat.BoatBits)
@@ -68,6 +68,22 @@ namespace BusinessLayer
                     return false;
             }
 
+            return true;
+        }
+
+
+        // REMINDER: Change after Darios push from his home PC
+        public bool DeleteBoat(Position position)
+        {
+            //BoatBit boatBit = _boats.SelectMany(x => x.BoatBits).FirstOrDefault(x => x.XYPosition == position);
+            Boat boat = _boats.FirstOrDefault(x => x.BoatBits.Any(y => y.XYPosition == position));
+
+            if (boat == null)
+            {
+                return false;
+            }
+
+            _boats.Remove(boat);
             return true;
         }
 
