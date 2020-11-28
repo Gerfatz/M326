@@ -87,6 +87,28 @@ namespace BusinessLayer
             return true;
         }
 
+        public int XBoatCount(sbyte xCoord)
+        {
+            int count = 0;
+            foreach (Boat boat in _boats)
+            {
+                count += boat.BoatBits.Count(x => x.XYPosition.X == xCoord);
+            }
+
+            return count;
+        }
+
+        public int YBoatCount(sbyte yCoord)
+        {
+            int count = 0;
+            foreach (Boat boat in _boats)
+            {
+                count += boat.BoatBits.Count(x => x.XYPosition.Y == yCoord);
+            }
+
+            return count;
+        }
+
         public int SideLength => _sideLength;
 
         public List<Boat> Boats => _boats;

@@ -33,7 +33,7 @@ namespace Battleships
             FieldSizeBox.Text = "7";
             PlayingField.Field = new Field(7);
             DataContext = PlayingField;
-            GeneratePlayingField();
+            GenerateEditPlayingField();
         }
 
         private void FieldSizeBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -45,8 +45,9 @@ namespace Battleships
                 PlayingField.Field = new Field(numOut);
 
                 FieldSizeBox.Foreground = Brushes.Black;
-                GeneratePlayingField();
                 PlayingField.Field.Boats.Clear();
+                PlayingField.SelectedPositions.Clear();
+                GenerateEditPlayingField();
                 GC.Collect();
             }
             else
@@ -55,36 +56,47 @@ namespace Battleships
             }
         }
 
-        private void FieldBtn_Click(Position position, Field field, object sender, RoutedEventArgs e)
+        private void FieldBtn_Click(Position position, object sender, RoutedEventArgs e)
         {
-            if (PlayingField.ButtonState == true)
+            if (PlayingField.ButtonState == true && PlayingField.EditorMode)
             {
                 PlayingField.Field.DeleteBoat(position);
-                GeneratePlayingField();
+                GenerateEditPlayingField();
+                _btnToggleOn = false;
+            }
+            else if (!PlayingField.EditorMode)
+            {
+                ((Button)sender).Background = Brushes.Black;
+                PlayingField.SelectedPositions.Add(position);
             }
             else
             {
                 Button button = (Button)sender;
-                if (_btnToggleOn)
-                {
-                    _btnToggleOn = false;
-                    button.Background = Brushes.Black;
-
-                    PlayingField.Field.CreateBoat(_btnPos, position);
-                    GeneratePlayingField();
-                }
-                else
-                {
-                    _btnToggleOn = true;
-                    _btnPos = position;
-                    button.Background = Brushes.Gray;
-                }
+                BtnCreateBoat(button, position);
             }
-            
+        }
+
+        private void BtnCreateBoat(Button button, Position position)
+        {
+            if (_btnToggleOn)
+            {
+                _btnToggleOn = false;
+                button.Background = Brushes.Black;
+
+                PlayingField.Field.CreateBoat(_btnPos, position);
+                GenerateEditPlayingField();
+            }
+            else
+            {
+                _btnToggleOn = true;
+                _btnPos = position;
+                button.Background = Brushes.Gray;
+            }
         }
         
-        private void GeneratePlayingField()
+        private void GenerateEditPlayingField()
         {
+
             int fieldSize = PlayingField.Field.SideLength;
 
             PlayingFieldGrid.Children.Clear();
@@ -97,30 +109,96 @@ namespace Battleships
             {
                 for (sbyte x = 0; x < fieldSize; x++)
                 {
+                        Button button = new Button
+                        {
+                            Background = Brushes.Blue,
+                            Height = Width,
+                            Margin = new Thickness(1)
+                        };
+
+
+                        Position pos = new Position(x, y);
+                        if (PlayingField.Field.Boats.Any(x => x.BoatBits.Any(x => x.XYPosition == pos)))
+                        {
+                            button.Background = Brushes.Black;
+                        }
+
+                        PlayingFieldGrid.Children.Add(button);
+                        button.Click += (s, e) => FieldBtn_Click(pos, s, e);
+                }
+            }
+        }
+
+        private void GeneratePlayingField()
+        {
+            int fieldSize = PlayingField.Field.SideLength;
+
+            PlayingFieldGrid.Children.Clear();
+            PlayingFieldGrid.Columns = fieldSize + 1;
+            PlayingFieldGrid.Rows = fieldSize + 1;
+
+            int fieldAmnt = fieldSize * fieldSize;
+
+            for (sbyte y = 0; y < fieldSize; y++)
+            {
+                for (sbyte x = 0; x < fieldSize; x++)
+                {
                     Button button = new Button
                     {
                         Background = Brushes.Blue,
-                        Content = "i",
                         Height = Width,
                         Margin = new Thickness(1)
                     };
 
 
                     Position pos = new Position(x, y);
-                    if (PlayingField.Field.Boats.Any(x => x.BoatBits.Any(x => x.XYPosition == pos)))
+                    /*if (PlayingField.Field.Boats.Any(x => x.BoatBits.Any(x => x.XYPosition == pos)))
                     {
                         button.Background = Brushes.Black;
-                    }
+                    }*/
 
                     PlayingFieldGrid.Children.Add(button);
-                    button.Click += (s, e) => FieldBtn_Click(pos, PlayingField.Field, s, e);
+                    button.Click += (s, e) => FieldBtn_Click(pos, s, e);
                 }
+
+                TextBlock textBlock = new TextBlock
+                {
+                    Text = PlayingField.Field.YBoatCount(y).ToString(),
+                    TextAlignment = TextAlignment.Center
+                };
+                PlayingFieldGrid.Children.Add(textBlock);
+            }
+
+            for (sbyte x = 0; x < fieldSize; x++)
+            {
+                TextBlock textBlock = new TextBlock
+                {
+                    Text = PlayingField.Field.XBoatCount(x).ToString(),
+                    TextAlignment = TextAlignment.Center
+                };
+                PlayingFieldGrid.Children.Add(textBlock);
             }
         }
 
         private void CreateButton_Click(object sender, RoutedEventArgs e)
         {
-            PlayingField.EditorMode = false;
+            if (PlayingField.EditorMode == true)
+            {
+                CreateButton.Content = "Edit mode";
+                PlayingField.EditorMode = false;
+                _btnToggleOn = false;
+                EditorGrid.Visibility = Visibility.Hidden;
+                GeneratePlayingField();
+            }
+            else
+            {
+                CreateButton.Content = "Start game";
+                PlayingField.EditorMode = true;
+                EditorGrid.Visibility = Visibility.Visible;
+                GenerateEditPlayingField();
+            }
+
+            PlayingField.SelectedPositions.Clear();
         }
     }
 }
