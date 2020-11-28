@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Battleships"
         mc:Ignorable="d"
-        Title="Battleship Sudoku" Height="510" Width="900">
+        Title="Battleship Sudoku" Height="530" Width="900" MinHeight="530" MinWidth="900">
 
     
     <Window.Resources>
@@ -36,7 +36,7 @@
 
         </StackPanel>
         <StackPanel  Grid.Row="1" Background="#1E88E5">
-            <UniformGrid Name="EditorGrid" Columns="2" Margin="2 0" Visibility="{Binding Path=EditorMode}">
+            <UniformGrid Name="EditorGrid" Columns="2" Margin="2 0">
                 <TextBlock Text="Field size:"/>
                 <TextBox x:Name="FieldSizeBox" TextChanged="FieldSizeBox_TextChanged"/>
                 <TextBlock Text="Toggle delete:"/>
@@ -44,9 +44,10 @@
             </UniformGrid>
         </StackPanel>
 
-        <StackPanel Grid.Column="1" Grid.RowSpan="2" Background="#90CAF9">
+        <StackPanel Grid.Column="1" Grid.RowSpan="2" Background="#90CAF9" >
             <Label Content="Playing field"/>
             <UniformGrid x:Name="PlayingFieldGrid" Margin="5" Height="400" Width="400"/>
+            <Button Name="ShowResultBtn" Content="Check result" Margin="5" Click="ShowResultBtn_Click"/>
         </StackPanel>
     </Grid>
 </Window>

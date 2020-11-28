@@ -66,13 +66,26 @@ namespace Battleships
             }
             else if (!PlayingField.EditorMode)
             {
-                ((Button)sender).Background = Brushes.Black;
-                PlayingField.SelectedPositions.Add(position);
+                BtnGameClick((Button)sender, position);
             }
             else
             {
                 Button button = (Button)sender;
                 BtnCreateBoat(button, position);
+            }
+        }
+
+        private void BtnGameClick(Button button, Position position)
+        {
+            if (button.Background == Brushes.Black)
+            {
+                button.Background = Brushes.Blue;
+                PlayingField.SelectedPositions.Remove(position);
+            }
+            else
+            {
+                button.Background = Brushes.Black;
+                PlayingField.SelectedPositions.Add(position);
             }
         }
 
@@ -96,7 +109,6 @@ namespace Battleships
         
         private void GenerateEditPlayingField()
         {
-
             int fieldSize = PlayingField.Field.SideLength;
 
             PlayingFieldGrid.Children.Clear();
@@ -129,7 +141,7 @@ namespace Battleships
             }
         }
 
-        private void GeneratePlayingField()
+        private void GeneratePlayingField(bool showResult = false)
         {
             int fieldSize = PlayingField.Field.SideLength;
 
@@ -149,16 +161,19 @@ namespace Battleships
                         Height = Width,
                         Margin = new Thickness(1)
                     };
-
-
+                    
                     Position pos = new Position(x, y);
-                    /*if (PlayingField.Field.Boats.Any(x => x.BoatBits.Any(x => x.XYPosition == pos)))
+
+                    if (showResult)
                     {
-                        button.Background = Brushes.Black;
-                    }*/
+                        ShowBtnResult(button, pos);
+                    }
+                    else
+                    {
+                        button.Click += (s, e) => FieldBtn_Click(pos, s, e);
+                    }
 
                     PlayingFieldGrid.Children.Add(button);
-                    button.Click += (s, e) => FieldBtn_Click(pos, s, e);
                 }
 
                 TextBlock textBlock = new TextBlock
@@ -199,6 +214,42 @@ namespace Battleships
             }
 
             PlayingField.SelectedPositions.Clear();
+        }
+
+        private bool ShowBtnResult(Button button, Position position)
+        {
+            foreach (BoatBit boatBit in PlayingField.Field.Boats.SelectMany(x => x.BoatBits))
+            {
+                if (boatBit.XYPosition == position)
+                {
+                    button.Background = Brushes.Black;
+                }
+            }
+
+            foreach (Position pos in PlayingField.SelectedPositions)
+            {
+                if (pos == position)
+                {
+                    if (PlayingField.Field.Boats.SelectMany(x => x.BoatBits).Any(y => y.XYPosition == pos))
+                    {
+                        button.Background = Brushes.Green;
+                        return true;
+                    }
+                    else
+                    {
+                        button.Background = Brushes.Red;
+                        return true;
+                    }
+                }
+                
+            }
+
+            return false;
+        }
+
+        private void ShowResultBtn_Click(object sender, RoutedEventArgs e)
+        {
+            GeneratePlayingField(true);
         }
     }
 }
