@@ -39,6 +39,15 @@ namespace BusinessLayer
                 return false;
 
             _boats.Add(boat);
+
+            Random r = new Random();
+            int randUncover = r.Next(5);
+
+            if (randUncover == 1)
+            {
+                boat.UncoverBoat();
+            }
+
             return true;
         }
 

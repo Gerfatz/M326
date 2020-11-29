@@ -54,6 +54,14 @@ namespace BusinessLayer
             return boat;
         }
 
+        public void UncoverBoat()
+        {
+            foreach (BoatBit boatBit in BoatBits)
+            {
+                boatBit.WasFound = true;
+            }
+        }
+
         /// <summary>
         /// Creates the bits between two points on a given axis.
         /// </summary>

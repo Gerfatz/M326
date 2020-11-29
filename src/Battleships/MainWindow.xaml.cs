@@ -26,6 +26,8 @@ namespace Battleships
         private bool _btnToggleOn = false;
         private Position _btnPos;
 
+
+
         public MainWindow()
         {
             InitializeComponent();
@@ -35,6 +37,8 @@ namespace Battleships
             DataContext = PlayingField;
             GenerateEditPlayingField();
         }
+
+
 
         private void FieldSizeBox_TextChanged(object sender, TextChangedEventArgs e)
         {
@@ -56,6 +60,8 @@ namespace Battleships
             }
         }
 
+
+
         private void FieldBtn_Click(Position position, object sender, RoutedEventArgs e)
         {
             if (PlayingField.ButtonState == true && PlayingField.EditorMode)
@@ -75,6 +81,8 @@ namespace Battleships
             }
         }
 
+
+
         private void BtnGameClick(Button button, Position position)
         {
             if (button.Background == Brushes.Black)
@@ -88,6 +96,8 @@ namespace Battleships
                 PlayingField.SelectedPositions.Add(position);
             }
         }
+
+
 
         private void BtnCreateBoat(Button button, Position position)
         {
@@ -106,6 +116,8 @@ namespace Battleships
                 button.Background = Brushes.Gray;
             }
         }
+
+
         
         private void GenerateEditPlayingField()
         {
@@ -114,8 +126,6 @@ namespace Battleships
             PlayingFieldGrid.Children.Clear();
             PlayingFieldGrid.Columns = fieldSize;
             PlayingFieldGrid.Rows = fieldSize;
-
-            int fieldAmnt = fieldSize * fieldSize;
 
             for (sbyte y = 0; y < fieldSize; y++)
             {
@@ -141,6 +151,8 @@ namespace Battleships
             }
         }
 
+
+
         private void GeneratePlayingField(bool showResult = false)
         {
             int fieldSize = PlayingField.Field.SideLength;
@@ -148,8 +160,6 @@ namespace Battleships
             PlayingFieldGrid.Children.Clear();
             PlayingFieldGrid.Columns = fieldSize + 1;
             PlayingFieldGrid.Rows = fieldSize + 1;
-
-            int fieldAmnt = fieldSize * fieldSize;
 
             for (sbyte y = 0; y < fieldSize; y++)
             {
@@ -170,6 +180,10 @@ namespace Battleships
                     }
                     else
                     {
+                        if (PlayingField.Field.Boats.Any(x => x.WasFound && x.BoatBits.Any(y => y.XYPosition == pos)))
+                        {
+                            button.Background = Brushes.Black;
+                        }
                         button.Click += (s, e) => FieldBtn_Click(pos, s, e);
                     }
 
@@ -195,6 +209,8 @@ namespace Battleships
             }
         }
 
+
+        // Button to toggle game from "edit" and "play" mode
         private void CreateButton_Click(object sender, RoutedEventArgs e)
         {
             if (PlayingField.EditorMode == true)
@@ -216,8 +232,16 @@ namespace Battleships
             PlayingField.SelectedPositions.Clear();
         }
 
+
+        /// <summary>
+        /// Function to color button according to the result
+        /// </summary>
+        /// <param name="button">Button, of whitch the result should be displayed</param>
+        /// <param name="position">Buttons position on the field</param>
+        /// <returns></returns>
         private bool ShowBtnResult(Button button, Position position)
         {
+            // Sets color of button to black, if a ship was found on it's position
             foreach (BoatBit boatBit in PlayingField.Field.Boats.SelectMany(x => x.BoatBits))
             {
                 if (boatBit.XYPosition == position)
@@ -226,27 +250,29 @@ namespace Battleships
                 }
             }
 
-            foreach (Position pos in PlayingField.SelectedPositions)
+            // Sets buttons position to either green or red for the players guessed positions
+            foreach (Position pos in PlayingField.SelectedPositions.Where(x => x == position))
             {
-                if (pos == position)
+                // Checks if the guessed position exists in the boats list
+                if (PlayingField.Field.Boats.SelectMany(x => x.BoatBits).Any(y => y.XYPosition == pos))
                 {
-                    if (PlayingField.Field.Boats.SelectMany(x => x.BoatBits).Any(y => y.XYPosition == pos))
-                    {
-                        button.Background = Brushes.Green;
-                        return true;
-                    }
-                    else
-                    {
-                        button.Background = Brushes.Red;
-                        return true;
-                    }
+                    // sets button color to green to indicate the answer was correct
+                    button.Background = Brushes.Green;
+                    return true;
                 }
-                
+                else
+                {
+                    // sets button color to red to indicate the answer was incorrect
+                    button.Background = Brushes.Red;
+                    return true;
+                }
             }
 
             return false;
         }
 
+
+        // "Validate" button click function
         private void ShowResultBtn_Click(object sender, RoutedEventArgs e)
         {
             GeneratePlayingField(true);
