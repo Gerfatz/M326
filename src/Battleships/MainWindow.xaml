@@ -29,7 +29,7 @@
         <StackPanel Background="#1E88E5">
             <Label Content="Options"/>
             <Button Name="CreateButton" Content="Start game" Margin="2 1" Click="CreateButton_Click"/>
-            <Button Name="GenerateButton" Content="Generate game" Margin="2 0"/>
+            <Button Name="GenerateButton" Content="Generate game" Margin="2 0" Click="GenerateButton_Click"/>
             <Separator Margin="2 5 2 20" Background="DarkGray"/>
             <Button Name="SaveButton" Content="Save game" Margin="2 1"/>
             <Button Name="LoadButton" Content="Load game" Margin="2 0"/>

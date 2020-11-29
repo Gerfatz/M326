@@ -137,6 +137,49 @@ namespace BusinessLayer
             return count;
         }
 
+
+        public void GenerateBoats()
+        {
+            _boats.Clear();
+
+            List<Position> availablePositions = new List<Position>();
+
+            for (sbyte y = 0; y < _sideLength; y++)
+            {
+                for (sbyte x = 0; x < _sideLength; x++)
+                {
+                    Position pos = new Position(x, y);
+                    availablePositions.Add(pos);
+                }
+            }
+
+            Random random = new Random();
+            while (availablePositions.Count > 0)
+            {
+                Position pos1 = availablePositions[random.Next(availablePositions.Count)];
+                Position pos2 = availablePositions[random.Next(availablePositions.Count)];
+                if (CreateBoat(pos1, pos2))
+                {
+                    Boat boat = _boats[_boats.Count - 1];
+                    foreach (BoatBit boatBit in boat.BoatBits)
+                    {
+                        // Adds positions around and in "boatBit" to "boatPositions"
+                        for (int y = -1; y <= 1; y++)
+                        {
+                            for (int x = -1; x <= 1; x++)
+                            {
+                                sbyte posX = Convert.ToSByte(boatBit.XYPosition.X + x);
+                                sbyte posY = Convert.ToSByte(boatBit.XYPosition.Y + y);
+                                Position position = new Position(posX, posY);
+                                availablePositions.Remove(position);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+
         public int SideLength => _sideLength;
 
         public List<Boat> Boats => _boats;

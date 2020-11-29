@@ -247,20 +247,11 @@ namespace Battleships
 
             if (PlayingField.EditorMode == true)
             {
-                CreateButton.Content = "Edit mode";
-                PlayingField.EditorMode = false;
-                _btnToggleOn = false;
-                EditorGrid.Visibility = Visibility.Hidden;
-                ShowResultBtn.Visibility = Visibility.Visible;
-                GeneratePlayingField();
+                EnablePlayMode();
             }
             else
             {
-                CreateButton.Content = "Start game";
-                PlayingField.EditorMode = true;
-                EditorGrid.Visibility = Visibility.Visible;
-                ShowResultBtn.Visibility = Visibility.Hidden;
-                GenerateEditPlayingField();
+                EnableEditorMode();
             }
         }
 
@@ -308,6 +299,41 @@ namespace Battleships
         private void ShowResultBtn_Click(object sender, RoutedEventArgs e)
         {
             GeneratePlayingField(true);
+        }
+
+
+        // "Generate" button click function
+        private void GenerateButton_Click(object sender, RoutedEventArgs e)
+        {
+            PlayingField.Field.GenerateBoats();
+            EnablePlayMode();
+        }
+
+
+        /// <summary>
+        /// Enables playing mode/disables editor mode
+        /// </summary>
+        private void EnablePlayMode()
+        {
+            CreateButton.Content = "Edit mode";
+            PlayingField.EditorMode = false;
+            _btnToggleOn = false;
+            EditorGrid.Visibility = Visibility.Hidden;
+            ShowResultBtn.Visibility = Visibility.Visible;
+            GeneratePlayingField();
+        }
+
+
+        /// <summary>
+        /// Enables editor mode/disables playing mode
+        /// </summary>
+        private void EnableEditorMode()
+        {
+            CreateButton.Content = "Start game";
+            PlayingField.EditorMode = true;
+            EditorGrid.Visibility = Visibility.Visible;
+            ShowResultBtn.Visibility = Visibility.Hidden;
+            GenerateEditPlayingField();
         }
     }
 }
