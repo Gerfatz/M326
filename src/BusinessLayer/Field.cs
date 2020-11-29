@@ -41,7 +41,7 @@ namespace BusinessLayer
             _boats.Add(boat);
 
             Random r = new Random();
-            int randUncover = r.Next(5);
+            int randUncover = r.Next(3);
 
             if (randUncover == 1)
             {
