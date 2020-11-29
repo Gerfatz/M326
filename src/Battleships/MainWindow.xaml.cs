@@ -243,8 +243,6 @@ namespace Battleships
         // Button to toggle game from "edit" and "play" mode
         private void CreateButton_Click(object sender, RoutedEventArgs e)
         {
-            PlayingField.SelectedPositions.Clear();
-
             if (PlayingField.EditorMode == true)
             {
                 EnablePlayMode();
@@ -299,6 +297,7 @@ namespace Battleships
         private void ShowResultBtn_Click(object sender, RoutedEventArgs e)
         {
             GeneratePlayingField(true);
+            ShowResultBtn.Visibility = Visibility.Hidden;
         }
 
 
@@ -315,6 +314,8 @@ namespace Battleships
         /// </summary>
         private void EnablePlayMode()
         {
+            PlayingField.SelectedPositions.Clear();
+
             CreateButton.Content = "Edit mode";
             PlayingField.EditorMode = false;
             _btnToggleOn = false;
@@ -329,6 +330,8 @@ namespace Battleships
         /// </summary>
         private void EnableEditorMode()
         {
+            PlayingField.SelectedPositions.Clear();
+
             CreateButton.Content = "Start game";
             PlayingField.EditorMode = true;
             EditorGrid.Visibility = Visibility.Visible;
