@@ -40,14 +40,14 @@
                 <TextBlock Text="Field size:"/>
                 <TextBox x:Name="FieldSizeBox" TextChanged="FieldSizeBox_TextChanged"/>
                 <TextBlock Text="Toggle delete:"/>
-                <CheckBox IsChecked="{Binding Path=ButtonState}"/>
+                <CheckBox IsChecked="{Binding Path=DeleteState}"/>
             </UniformGrid>
         </StackPanel>
 
         <StackPanel Grid.Column="1" Grid.RowSpan="2" Background="#90CAF9" >
             <Label Content="Playing field"/>
             <UniformGrid x:Name="PlayingFieldGrid" Margin="5" Height="400" Width="400"/>
-            <Button Name="ShowResultBtn" Content="Check result" Margin="5" Click="ShowResultBtn_Click"/>
+            <Button Name="ShowResultBtn" Content="Check result" Margin="5" Click="ShowResultBtn_Click" Visibility="Hidden"/>
         </StackPanel>
     </Grid>
 </Window>

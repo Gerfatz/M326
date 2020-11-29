@@ -27,7 +27,7 @@ namespace Battleships
         private Position _btnPos;
 
 
-
+        // Window constructor
         public MainWindow()
         {
             InitializeComponent();
@@ -39,12 +39,12 @@ namespace Battleships
         }
 
 
-
+        // Validates field size typed in FieldSizeBox
         private void FieldSizeBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             string sizeText = FieldSizeBox.Text;
             int numOut;
-            if (int.TryParse(sizeText, out numOut) && numOut <= 20 && numOut >= 5)
+            if (int.TryParse(sizeText, out numOut) && numOut <= 20 && numOut >= 5) // field size must be between 5 and 20
             {
                 PlayingField.Field = new Field(numOut);
 
@@ -61,16 +61,22 @@ namespace Battleships
         }
 
 
-
-        private void FieldBtn_Click(Position position, object sender, RoutedEventArgs e)
+        /// <summary>
+        /// On click function for the grid buttons
+        /// </summary>
+        /// <param name="position">Position in the UniformGrid</param>
+        /// <param name="sender">Button that called the function</param>
+        private void FieldBtn_Click(Position position, object sender)
         {
-            if (PlayingField.ButtonState == true && PlayingField.EditorMode)
+            // Checks if delete mode is active and if the playing field is in editor mode
+            if (PlayingField.DeleteState == true && PlayingField.EditorMode)
             {
+                // Deletes the boat on the clicked buttons position
                 PlayingField.Field.DeleteBoat(position);
                 GenerateEditPlayingField();
                 _btnToggleOn = false;
             }
-            else if (!PlayingField.EditorMode)
+            else if (!PlayingField.EditorMode) // If playing field is not in edit mode
             {
                 BtnGameClick((Button)sender, position);
             }
@@ -82,15 +88,20 @@ namespace Battleships
         }
 
 
-
+        /// <summary>
+        /// Button click method for when the game is not in edit mode
+        /// </summary>
+        /// <param name="button"></param>
+        /// <param name="position"></param>
         private void BtnGameClick(Button button, Position position)
         {
+            // If button was already clicked
             if (button.Background == Brushes.Black)
             {
                 button.Background = Brushes.Blue;
                 PlayingField.SelectedPositions.Remove(position);
             }
-            else
+            else 
             {
                 button.Background = Brushes.Black;
                 PlayingField.SelectedPositions.Add(position);
@@ -98,7 +109,11 @@ namespace Battleships
         }
 
 
-
+        /// <summary>
+        /// Button click method for creating a boat in edit mode
+        /// </summary>
+        /// <param name="button"></param>
+        /// <param name="position"></param>
         private void BtnCreateBoat(Button button, Position position)
         {
             if (_btnToggleOn)
@@ -146,7 +161,7 @@ namespace Battleships
                         }
 
                         PlayingFieldGrid.Children.Add(button);
-                        button.Click += (s, e) => FieldBtn_Click(pos, s, e);
+                        button.Click += (s, e) => FieldBtn_Click(pos, s);
                 }
             }
         }
@@ -182,9 +197,10 @@ namespace Battleships
                     {
                         if (PlayingField.Field.Boats.Any(x => x.WasFound && x.BoatBits.Any(y => y.XYPosition == pos)))
                         {
+                            PlayingField.SelectedPositions.Add(pos);
                             button.Background = Brushes.Black;
                         }
-                        button.Click += (s, e) => FieldBtn_Click(pos, s, e);
+                        button.Click += (s, e) => FieldBtn_Click(pos, s);
                     }
 
                     PlayingFieldGrid.Children.Add(button);
@@ -219,6 +235,7 @@ namespace Battleships
                 PlayingField.EditorMode = false;
                 _btnToggleOn = false;
                 EditorGrid.Visibility = Visibility.Hidden;
+                ShowResultBtn.Visibility = Visibility.Visible;
                 GeneratePlayingField();
             }
             else
@@ -226,6 +243,7 @@ namespace Battleships
                 CreateButton.Content = "Start game";
                 PlayingField.EditorMode = true;
                 EditorGrid.Visibility = Visibility.Visible;
+                ShowResultBtn.Visibility = Visibility.Hidden;
                 GenerateEditPlayingField();
             }
 

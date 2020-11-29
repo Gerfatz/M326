@@ -54,6 +54,9 @@ namespace BusinessLayer
             return boat;
         }
 
+        /// <summary>
+        /// Sets all BoatBits in boat to "found"
+        /// </summary>
         public void UncoverBoat()
         {
             foreach (BoatBit boatBit in BoatBits)

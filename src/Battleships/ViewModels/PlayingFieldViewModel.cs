@@ -7,12 +7,13 @@ namespace Battleships.ViewModels
 {
     public class PlayingFieldViewModel
     {
-        public int FieldSize { get; set; }
-        public bool? ButtonState { get; set; } = false;
-        public Field Field { get; set; }
-        public bool EditorMode { get; set; } = true;
-        public List<Position> SelectedPositions { get; set; }
+        // Properties
+        public bool? DeleteState { get; set; } = false; // State of "delete" checkbox
+        public Field Field { get; set; } // Created field from business layer
+        public bool EditorMode { get; set; } = true; // State if editor mode is on
+        public List<Position> SelectedPositions { get; set; } // List of positions selected by the user
 
+        // Constructor
         public PlayingFieldViewModel()
         {
             SelectedPositions = new List<Position>();
