@@ -101,7 +101,7 @@ namespace Battleships
                 button.Background = Brushes.Blue;
                 PlayingField.SelectedPositions.Remove(position);
             }
-            else 
+            else
             {
                 button.Background = Brushes.Black;
                 PlayingField.SelectedPositions.Add(position);
@@ -133,53 +133,64 @@ namespace Battleships
         }
 
 
-        
+        /// <summary>
+        /// Method that generates the playing field in edit mode
+        /// </summary>
         private void GenerateEditPlayingField()
         {
-            int fieldSize = PlayingField.Field.SideLength;
+            PlayingFieldGrid.Children.Clear(); // Clearing previous buttons
 
-            PlayingFieldGrid.Children.Clear();
+            int fieldSize = PlayingField.Field.SideLength;
+            
             PlayingFieldGrid.Columns = fieldSize;
             PlayingFieldGrid.Rows = fieldSize;
 
+            // Loop to add X and Y positions of grid
             for (sbyte y = 0; y < fieldSize; y++)
             {
                 for (sbyte x = 0; x < fieldSize; x++)
                 {
-                        Button button = new Button
-                        {
-                            Background = Brushes.Blue,
-                            Height = Width,
-                            Margin = new Thickness(1)
-                        };
+                    // New button is created and added to the grid
+                    Button button = new Button
+                    {
+                        Background = Brushes.Blue,
+                        Height = Width,
+                        Margin = new Thickness(1)
+                    };
 
 
-                        Position pos = new Position(x, y);
-                        if (PlayingField.Field.Boats.Any(x => x.BoatBits.Any(x => x.XYPosition == pos)))
-                        {
-                            button.Background = Brushes.Black;
-                        }
+                    Position pos = new Position(x, y);
+                    if (PlayingField.Field.Boats.Any(x => x.BoatBits.Any(x => x.XYPosition == pos)))
+                    {
+                        button.Background = Brushes.Black;
+                    }
 
-                        PlayingFieldGrid.Children.Add(button);
-                        button.Click += (s, e) => FieldBtn_Click(pos, s);
+                    PlayingFieldGrid.Children.Add(button); // Adds button to grid
+                    button.Click += (s, e) => FieldBtn_Click(pos, s); // Assigns click function to button
                 }
             }
         }
 
 
-
+        /// <summary>
+        /// Generates playing field for when it is not in edit mode
+        /// </summary>
+        /// <param name="showResult">Shows results to game when set to true</param>
         private void GeneratePlayingField(bool showResult = false)
         {
             int fieldSize = PlayingField.Field.SideLength;
-
             PlayingFieldGrid.Children.Clear();
+
+            // 1 is added to the grid to display BoatBit counts
             PlayingFieldGrid.Columns = fieldSize + 1;
             PlayingFieldGrid.Rows = fieldSize + 1;
 
+            // Loop to add X and Y positions of grid
             for (sbyte y = 0; y < fieldSize; y++)
             {
                 for (sbyte x = 0; x < fieldSize; x++)
                 {
+                    // New button is created and added to the grid
                     Button button = new Button
                     {
                         Background = Brushes.Blue,
@@ -189,6 +200,7 @@ namespace Battleships
                     
                     Position pos = new Position(x, y);
 
+                    // Checks if result should be shown
                     if (showResult)
                     {
                         ShowBtnResult(button, pos);
@@ -197,15 +209,16 @@ namespace Battleships
                     {
                         if (PlayingField.Field.Boats.Any(x => x.WasFound && x.BoatBits.Any(y => y.XYPosition == pos)))
                         {
-                            PlayingField.SelectedPositions.Add(pos);
                             button.Background = Brushes.Black;
+                            PlayingField.SelectedPositions.Add(pos);
                         }
-                        button.Click += (s, e) => FieldBtn_Click(pos, s);
+                        button.Click += (s, e) => FieldBtn_Click(pos, s); // Click will only work when results aren't shown
                     }
 
-                    PlayingFieldGrid.Children.Add(button);
+                    PlayingFieldGrid.Children.Add(button); // Button is added to grid
                 }
 
+                // Adds TextBlock showing count of BoatBits in row
                 TextBlock textBlock = new TextBlock
                 {
                     Text = PlayingField.Field.YBoatCount(y).ToString(),
@@ -214,6 +227,7 @@ namespace Battleships
                 PlayingFieldGrid.Children.Add(textBlock);
             }
 
+            // Counts of BoatBits are added in the last row
             for (sbyte x = 0; x < fieldSize; x++)
             {
                 TextBlock textBlock = new TextBlock
@@ -229,6 +243,8 @@ namespace Battleships
         // Button to toggle game from "edit" and "play" mode
         private void CreateButton_Click(object sender, RoutedEventArgs e)
         {
+            PlayingField.SelectedPositions.Clear();
+
             if (PlayingField.EditorMode == true)
             {
                 CreateButton.Content = "Edit mode";
@@ -246,8 +262,6 @@ namespace Battleships
                 ShowResultBtn.Visibility = Visibility.Hidden;
                 GenerateEditPlayingField();
             }
-
-            PlayingField.SelectedPositions.Clear();
         }
 
 
