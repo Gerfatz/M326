@@ -138,12 +138,16 @@ namespace BusinessLayer
         }
 
 
+        /// <summary>
+        /// Generates boats randomly in field
+        /// </summary>
         public void GenerateBoats()
         {
             _boats.Clear();
 
             List<Position> availablePositions = new List<Position>();
 
+            // Fills availablePositions with all possible positions 
             for (sbyte y = 0; y < _sideLength; y++)
             {
                 for (sbyte x = 0; x < _sideLength; x++)
@@ -154,16 +158,17 @@ namespace BusinessLayer
             }
 
             Random random = new Random();
-            while (availablePositions.Count > 0)
+            while (availablePositions.Count > 0) // Loop to create as many boats as possible
             {
+                // Taking two random positions from availablePositions
                 Position pos1 = availablePositions[random.Next(availablePositions.Count)];
                 Position pos2 = availablePositions[random.Next(availablePositions.Count)];
                 if (CreateBoat(pos1, pos2))
                 {
-                    Boat boat = _boats[_boats.Count - 1];
+                    Boat boat = _boats[_boats.Count - 1]; // Takes latest boat from list
                     foreach (BoatBit boatBit in boat.BoatBits)
                     {
-                        // Adds positions around and in "boatBit" to "boatPositions"
+                        // Removes positions around and in "boatBit" from "availablePositions"
                         for (int y = -1; y <= 1; y++)
                         {
                             for (int x = -1; x <= 1; x++)
