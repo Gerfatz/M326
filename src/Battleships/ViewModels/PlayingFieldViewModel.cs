@@ -9,6 +9,7 @@ using System.Text;
 using Battleships.Commands;
 using BusinessLayer;
 using BusinessLayer.Storage;
+using Microsoft.Win32;
 
 namespace Battleships.ViewModels
 {
@@ -86,6 +87,7 @@ namespace Battleships.ViewModels
         public ActionCommand NewFieldCommand { get; set; }
         public ActionCommand ShowResultCommand { get; set; }
         public ActionCommand ToggleEditCommand { get; set; }
+        public ActionCommand ExportCommand { get; set; }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -99,6 +101,7 @@ namespace Battleships.ViewModels
             NewFieldCommand = new ActionCommand(NewField);
             ShowResultCommand = new ActionCommand(ShowRes);
             ToggleEditCommand = new ActionCommand(ToggleEdit);
+            ExportCommand = new ActionCommand(Export);
 
             _fieldsaver = new Fieldsaver();
             Fields = new ObservableCollection<FieldSavingModel>(_fieldsaver.GetAllFields());
@@ -128,6 +131,17 @@ namespace Battleships.ViewModels
 
             SelectedField = Fields.First(f => f.Id == newFieldGuid);
             Field = field;
+        }
+
+        public void Export()
+        {
+            SaveFileDialog dialog = new SaveFileDialog();
+            dialog.AddExtension = true;
+            dialog.Filter = "pdf";
+            if(dialog.ShowDialog() == true)
+            {
+                //Call Generator
+            }
         }
 
         public void ShowRes()
