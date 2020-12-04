@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -32,31 +33,24 @@ namespace Battleships
         {
             InitializeComponent();
             PlayingField = new PlayingFieldViewModel();
-            FieldSizeBox.Text = "7";
-            PlayingField.Field = new Field(7);
+            PlayingField.PropertyChanged += OnFieldChange;
             DataContext = PlayingField;
-            GenerateEditPlayingField();
         }
 
 
-        // Validates field size typed in FieldSizeBox
-        private void FieldSizeBox_TextChanged(object sender, TextChangedEventArgs e)
+        public void OnFieldChange(object obj, PropertyChangedEventArgs args)
         {
-            string sizeText = FieldSizeBox.Text;
-            int numOut;
-            if (int.TryParse(sizeText, out numOut) && numOut <= 20 && numOut >= 5) // field size must be between 5 and 20
+            if((args.PropertyName == "Field" || args.PropertyName == "ShowResult" || args.PropertyName == "EditMode") 
+                && PlayingField.Field != null)
             {
-                PlayingField.Field = new Field(numOut);
-
-                FieldSizeBox.Foreground = Brushes.Black;
-                PlayingField.Field.Boats.Clear();
-                PlayingField.SelectedPositions.Clear();
-                GenerateEditPlayingField();
-                GC.Collect();
-            }
-            else
-            {
-                FieldSizeBox.Foreground = Brushes.Red;
+                if (PlayingField.EditMode)
+                {
+                    GenerateEditPlayingField();
+                }
+                else
+                {
+                    GeneratePlayingField(PlayingField.ShowResult);
+                }
             }
         }
 
@@ -69,14 +63,14 @@ namespace Battleships
         private void FieldBtn_Click(Position position, object sender)
         {
             // Checks if delete mode is active and if the playing field is in editor mode
-            if (PlayingField.DeleteState == true && PlayingField.EditorMode)
+            if (PlayingField.DeleteState == true && PlayingField.EditMode)
             {
                 // Deletes the boat on the clicked buttons position
                 PlayingField.Field.DeleteBoat(position);
                 GenerateEditPlayingField();
                 _btnToggleOn = false;
             }
-            else if (!PlayingField.EditorMode) // If playing field is not in edit mode
+            else if (!PlayingField.EditMode) // If playing field is not in edit mode
             {
                 BtnGameClick((Button)sender, position);
             }
@@ -197,6 +191,7 @@ namespace Battleships
                         Height = Width,
                         Margin = new Thickness(1)
                     };
+
                     
                     Position pos = new Position(x, y);
 
@@ -238,21 +233,6 @@ namespace Battleships
                 PlayingFieldGrid.Children.Add(textBlock);
             }
         }
-
-
-        // Button to toggle game from "edit" and "play" mode
-        private void CreateButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (PlayingField.EditorMode == true)
-            {
-                EnablePlayMode();
-            }
-            else
-            {
-                EnableEditorMode();
-            }
-        }
-
 
         /// <summary>
         /// Function to color button according to the result
@@ -316,8 +296,6 @@ namespace Battleships
         {
             PlayingField.SelectedPositions.Clear();
 
-            CreateButton.Content = "Edit mode";
-            PlayingField.EditorMode = false;
             _btnToggleOn = false;
             EditorGrid.Visibility = Visibility.Hidden;
             ShowResultBtn.Visibility = Visibility.Visible;
@@ -332,8 +310,6 @@ namespace Battleships
         {
             PlayingField.SelectedPositions.Clear();
 
-            CreateButton.Content = "Start game";
-            PlayingField.EditorMode = true;
             EditorGrid.Visibility = Visibility.Visible;
             ShowResultBtn.Visibility = Visibility.Hidden;
             GenerateEditPlayingField();

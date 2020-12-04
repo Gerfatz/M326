@@ -29,7 +29,7 @@ namespace BusinessLayer.Storage
         /// <remarks>
         /// The GUID can be used to access single fields. The string is the name of the field
         /// </remarks>
-        public Dictionary<Guid, string> GetAllFields()
+        public List<FieldSavingModel> GetAllFields()
         {
             EnsureAppdataExists();
 
@@ -38,7 +38,7 @@ namespace BusinessLayer.Storage
             using FileStream stream = new FileStream(pathToFile, FileMode.OpenOrCreate, FileAccess.Read);
             using StreamReader reader = new StreamReader(stream);
 
-            return JsonConvert.DeserializeObject<Dictionary<Guid, string>>(reader.ReadToEnd()) ?? new Dictionary<Guid, string>();
+            return JsonConvert.DeserializeObject<List<FieldSavingModel>>(reader.ReadToEnd()) ?? new List<FieldSavingModel>();
         }
 
         /// <summary>
@@ -133,21 +133,26 @@ namespace BusinessLayer.Storage
                 File.Create(pathToFile).Close();
             }
 
-            Dictionary<Guid, string> fields = JsonConvert.DeserializeObject<Dictionary<Guid, string>>(File.ReadAllText(pathToFile)) ?? new Dictionary<Guid, string>();
+            List<FieldSavingModel> fields = JsonConvert.DeserializeObject<List<FieldSavingModel>>(File.ReadAllText(pathToFile)) ?? new List<FieldSavingModel>();
+            FieldSavingModel field = fields.FirstOrDefault(f => f.Id == id);
 
             if(name == null)
             {
-                fields.Remove(id);
+                fields.Remove(field);
             }
             else
             {
-                if (fields.ContainsKey(id))
+                if (field != null)
                 {
-                    fields[id] = name;
+                    field.Name = name;
                 }
                 else
                 {
-                    fields.Add(id, name);
+                    fields.Add(new FieldSavingModel
+                    {
+                        Id = id,
+                        Name = name
+                    });
                 }
             }
 
