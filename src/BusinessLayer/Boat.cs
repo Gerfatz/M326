@@ -55,17 +55,28 @@ namespace BusinessLayer
         }
 
         /// <summary>
+        /// Sets all BoatBits in boat to "found"
+        /// </summary>
+        public void UncoverBoat()
+        {
+            foreach (BoatBit boatBit in BoatBits)
+            {
+                boatBit.WasFound = true;
+            }
+        }
+
+        /// <summary>
         /// Creates the bits between two points on a given axis.
         /// </summary>
         /// <param name="startPos">First given position on axis</param>
         /// <param name="endPos">Last given position on axis</param>
         /// <param name="staticAxis">Common axis position</param>
         /// <param name="isXAxis">To Check if position is on the X axis</param>
-        private void CreateBoatBits(byte startPos, byte endPos, byte staticAxis, bool isXAxis)
+        private void CreateBoatBits(sbyte startPos, sbyte endPos, sbyte staticAxis, bool isXAxis)
         {
-            byte difference;
-            byte start;
-            byte end;
+            sbyte difference;
+            sbyte start;
+            sbyte end;
             Position pos;
 
             if (startPos > endPos)
@@ -80,17 +91,17 @@ namespace BusinessLayer
             }
 
 
-            difference = (byte)(start - end);
+            difference = (sbyte)(start - end);
 
-            for (byte i = 0; i <= difference; i++)
+            for (sbyte i = 0; i <= difference; i++)
             {
                 if (isXAxis)
                 {
-                    pos = new Position(staticAxis, (byte)(end + i));
+                    pos = new Position(staticAxis, (sbyte)(end + i));
                 }
                 else
                 {
-                    pos = new Position((byte)(end + i), staticAxis);
+                    pos = new Position((sbyte)(end + i), staticAxis);
                 }
                 BoatBits.Add(new BoatBit(pos, this));
             }
