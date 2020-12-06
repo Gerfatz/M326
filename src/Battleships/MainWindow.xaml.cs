@@ -299,6 +299,7 @@ namespace Battleships
             _btnToggleOn = false;
             EditorGrid.Visibility = Visibility.Hidden;
             ShowResultBtn.Visibility = Visibility.Visible;
+            ShowBoatTypes();
             GeneratePlayingField();
         }
 
@@ -312,7 +313,38 @@ namespace Battleships
 
             EditorGrid.Visibility = Visibility.Visible;
             ShowResultBtn.Visibility = Visibility.Hidden;
+            BoatTypeGrid.Children.Clear();
             GenerateEditPlayingField();
+        }
+
+
+
+        public void ShowBoatTypes()
+        {
+            BoatTypeGrid.Children.Clear();
+            Dictionary<int, int> boatTypes = PlayingField.Field.GetBoatSizes();
+
+            foreach (KeyValuePair<int, int> boatType in boatTypes)
+            {
+                string boatDisplay = "";
+                for (int i = 0; i < boatType.Key; i++)
+                {
+                    boatDisplay += "[ ]";
+                }
+
+                TextBlock boatLength = new TextBlock
+                {
+                    Text = boatDisplay
+                };
+
+                TextBlock boatTypeCount = new TextBlock
+                {
+                    Text = boatType.Value + "x"
+                };
+
+                BoatTypeGrid.Children.Add(boatLength);
+                BoatTypeGrid.Children.Add(boatTypeCount);
+            }
         }
     }
 }

@@ -184,9 +184,48 @@ namespace BusinessLayer
             }
         }
 
+        /// <summary>
+        /// A method that will get the boat types, saved in 
+        /// the key of the returned dictionary, aswell as the
+        /// count of those boats on the field.
+        /// </summary>
+        /// <returns>
+        /// A dictiorary containg the boat lengths as the key
+        /// and the count of the lengths as the value.
+        /// </returns>
+        public Dictionary<int, int> GetBoatSizes()
+        {
+            Dictionary<int, int> boatSizes = new Dictionary<int, int>();
+
+            foreach (Boat boat in _boats)
+            {
+                int boatBitsCount = boat.BoatBits.Count;
+                if (boatSizes.Any(x => x.Key == boatBitsCount))
+                {
+                    boatSizes[boatBitsCount]++;
+                }
+                else
+                {
+                    boatSizes.Add(boat.BoatBits.Count, 1);
+                }
+            }
+
+            return boatSizes;
+        }
+
 
         public int SideLength => _sideLength;
 
         public List<Boat> Boats => _boats;
+
+        public int GetNumOfBoatsInRow(int row)
+        {
+            return _boats.SelectMany(b => b.BoatBits).Count(bb => bb.XYPosition.Y == row);
+        }
+
+        public int GetNumOfBoatsInColumn(int col)
+        {
+            return _boats.SelectMany(b => b.BoatBits).Count(bb => bb.XYPosition.X == col);
+        }
     }
 }
