@@ -216,7 +216,7 @@ namespace Battleships
                 // Adds TextBlock showing count of BoatBits in row
                 TextBlock textBlock = new TextBlock
                 {
-                    Text = PlayingField.Field.YBoatCount(y).ToString(),
+                    Text = PlayingField.Field.GetNumOfBoatsInColumn(y).ToString(),
                     TextAlignment = TextAlignment.Center
                 };
                 PlayingFieldGrid.Children.Add(textBlock);
@@ -227,7 +227,7 @@ namespace Battleships
             {
                 TextBlock textBlock = new TextBlock
                 {
-                    Text = PlayingField.Field.XBoatCount(x).ToString(),
+                    Text = PlayingField.Field.GetNumOfBoatsInRow(x).ToString(),
                     TextAlignment = TextAlignment.Center
                 };
                 PlayingFieldGrid.Children.Add(textBlock);

@@ -105,38 +105,6 @@ namespace BusinessLayer
             return true;
         }
 
-        /// <summary>
-        /// Returns amount of BoatBits on x coordinate
-        /// </summary>
-        /// <param name="yCoord">X coordinate</param>
-        /// <returns>Amount of BoatBits in xCoord</returns>
-        public int XBoatCount(sbyte xCoord)
-        {
-            int count = 0;
-            foreach (Boat boat in _boats)
-            {
-                count += boat.BoatBits.Count(x => x.XYPosition.X == xCoord);
-            }
-
-            return count;
-        }
-
-        /// <summary>
-        /// Returns amount of BoatBits on y coordinate
-        /// </summary>
-        /// <param name="yCoord">Y coordinate</param>
-        /// <returns>Amount of BoatBits in yCoord</returns>
-        public int YBoatCount(sbyte yCoord)
-        {
-            int count = 0;
-            foreach (Boat boat in _boats)
-            {
-                count += boat.BoatBits.Count(x => x.XYPosition.Y == yCoord);
-            }
-
-            return count;
-        }
-
 
         /// <summary>
         /// Generates boats randomly in field

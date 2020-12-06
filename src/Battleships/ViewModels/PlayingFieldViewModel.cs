@@ -3,11 +3,14 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Windows;
 using Battleships.Commands;
 using BusinessLayer;
+using BusinessLayer.DocumentGeneration;
 using BusinessLayer.Storage;
 using Microsoft.Win32;
 
@@ -42,19 +45,32 @@ namespace Battleships.ViewModels
             get => _selectedField;
             set
             {
+                if(_selectedField != null)
+                {
+                    _selectedField.PropertyChanged -= UpdateFieldName;
+                }
                 _selectedField = value;
+                _selectedField.PropertyChanged += UpdateFieldName;
+                Field = _fieldsaver.GetField(_selectedField.Id);
                 OnPropertyChanged();
             }
         }
 
-        [Range(5, 20)]
         public int SideLength
         {
             get => _sideLength;
             set
             {
-                _sideLength = value;
-                OnPropertyChanged();
+                if(value >= 5 && value <= 20)
+                {
+                    _sideLength = value;
+                    Field = new Field(_sideLength);
+                    OnPropertyChanged();
+                }
+                else
+                {
+                    MessageBox.Show("Minimum Size is 5. Maximum Size is 20");
+                }
             }
         }
 
@@ -83,11 +99,11 @@ namespace Battleships.ViewModels
 
         //Commands
         public ActionCommand SaveCommand { get; set; }
-        public ActionCommand LoadCommand { get; set; }
         public ActionCommand NewFieldCommand { get; set; }
         public ActionCommand ShowResultCommand { get; set; }
         public ActionCommand ToggleEditCommand { get; set; }
         public ActionCommand ExportCommand { get; set; }
+        public ActionCommand GenerateCommand { get; set; }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -96,12 +112,12 @@ namespace Battleships.ViewModels
         {
             SelectedPositions = new List<Position>();
 
-            SaveCommand = new ActionCommand(Save);
-            LoadCommand = new ActionCommand(Load);
+            SaveCommand = new ActionCommand(Save, IsFieldNotNull);
             NewFieldCommand = new ActionCommand(NewField);
             ShowResultCommand = new ActionCommand(ShowRes);
             ToggleEditCommand = new ActionCommand(ToggleEdit);
-            ExportCommand = new ActionCommand(Export);
+            ExportCommand = new ActionCommand(Export, IsFieldNotNull);
+            GenerateCommand = new ActionCommand(Generate, IsFieldNotNull);
 
             _fieldsaver = new Fieldsaver();
             Fields = new ObservableCollection<FieldSavingModel>(_fieldsaver.GetAllFields());
@@ -112,22 +128,12 @@ namespace Battleships.ViewModels
             _fieldsaver.Save(_field, _selectedField.Id);
         }
 
-        public void Load()
-        {
-            Field = _fieldsaver.GetField(_selectedField.Id);
-        }
-
         public void NewField()
         {
             Field field = new Field(_sideLength);
+            field.Name = "New Field";
             Guid newFieldGuid = _fieldsaver.Create(field);
-            Fields.Add(new FieldSavingModel
-            { 
-                Id = newFieldGuid,
-                Name = "New Field"
-            });
-
-            OnPropertyChanged(nameof(Fields));
+            Fields = new ObservableCollection<FieldSavingModel>(_fieldsaver.GetAllFields());
 
             SelectedField = Fields.First(f => f.Id == newFieldGuid);
             Field = field;
@@ -136,11 +142,46 @@ namespace Battleships.ViewModels
         public void Export()
         {
             SaveFileDialog dialog = new SaveFileDialog();
+            dialog.FileName = Field.Name + ".pdf";
             dialog.AddExtension = true;
-            dialog.Filter = "pdf";
+            dialog.Filter = "Pdf Document|*.pdf";
+
             if(dialog.ShowDialog() == true)
             {
-                //Call Generator
+                try
+                {
+                    PdfGenerator.Generate(dialog.FileName, Field);
+                    MessageBox.Show("Export successful");
+                }
+                catch(IOException)
+                {
+                    MessageBox.Show("Export failed. Make sure the seleced File is not in use by any other programm", "Export Failed", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+
+            }
+        }
+
+        public void Generate()
+        {
+            MessageBoxResult res = MessageBox.Show("This will overwrite the current Field. Are you sure you want to confinue?", "Confirm", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+
+            if(res == MessageBoxResult.Yes)
+            {
+                Field.GenerateBoats();
+                OnPropertyChanged(nameof(Field));
+            }
+        }
+
+        public bool IsFieldNotNull()
+        {
+            return Field != null;
+        }
+
+        public void UpdateFieldName(object sender, PropertyChangedEventArgs ev)
+        {
+            if(ev.PropertyName == "Name")
+            {
+                Field.Name = _selectedField.Name;
             }
         }
 
