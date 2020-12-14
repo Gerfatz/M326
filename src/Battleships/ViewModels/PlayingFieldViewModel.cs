@@ -21,6 +21,7 @@ namespace Battleships.ViewModels
         private readonly Fieldsaver _fieldsaver;
         private Field _field;
         private FieldSavingModel _selectedField;
+        private ObservableCollection<FieldSavingModel> _fields;
         private int _sideLength = 7;
         private bool _showResult = false;
         private bool _editMode = true;
@@ -38,7 +39,15 @@ namespace Battleships.ViewModels
 
         public List<Position> SelectedPositions { get; set; } // List of positions selected by the user
 
-        public ObservableCollection<FieldSavingModel> Fields { get; private set; }
+        public ObservableCollection<FieldSavingModel> Fields 
+        {
+            get => _fields;
+            private set
+            {
+                _fields = value;
+                OnPropertyChanged();
+            }
+        }
 
         public FieldSavingModel SelectedField
         {
@@ -50,8 +59,17 @@ namespace Battleships.ViewModels
                     _selectedField.PropertyChanged -= UpdateFieldName;
                 }
                 _selectedField = value;
-                _selectedField.PropertyChanged += UpdateFieldName;
-                Field = _fieldsaver.GetField(_selectedField.Id);
+
+                if(value != null)
+                {
+                    _selectedField.PropertyChanged += UpdateFieldName;
+                    Field = _fieldsaver.GetField(_selectedField.Id);
+                }
+                else
+                {
+                    Field = null;
+                }
+
                 OnPropertyChanged();
             }
         }
@@ -90,6 +108,7 @@ namespace Battleships.ViewModels
             private set
             {
                 _editMode = value;
+                SelectedPositions.Clear();
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(GameMode));
             }
@@ -103,6 +122,7 @@ namespace Battleships.ViewModels
         public ActionCommand ShowResultCommand { get; set; }
         public ActionCommand ToggleEditCommand { get; set; }
         public ActionCommand ExportCommand { get; set; }
+        public ActionCommand DeleteCommand { get; set; }
         public ActionCommand GenerateCommand { get; set; }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -117,6 +137,7 @@ namespace Battleships.ViewModels
             ShowResultCommand = new ActionCommand(ShowRes);
             ToggleEditCommand = new ActionCommand(ToggleEdit);
             ExportCommand = new ActionCommand(Export, IsFieldNotNull);
+            DeleteCommand = new ActionCommand(Delete, IsFieldNotNull);
             GenerateCommand = new ActionCommand(Generate, IsFieldNotNull);
 
             _fieldsaver = new Fieldsaver();
@@ -161,6 +182,17 @@ namespace Battleships.ViewModels
             }
         }
 
+        public void Delete()
+        {
+            MessageBoxResult res = MessageBox.Show("Are you sure you want to delete this game. This action is irreversible", "Confirm", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if(res == MessageBoxResult.Yes)
+            {
+                _fieldsaver.Delete(_selectedField.Id);
+                Fields.Remove(_selectedField);
+                SelectedField = null;
+            }
+        }
+
         public void Generate()
         {
             MessageBoxResult res = MessageBox.Show("This will overwrite the current Field. Are you sure you want to confinue?", "Confirm", MessageBoxButton.YesNo, MessageBoxImage.Warning);
@@ -168,6 +200,8 @@ namespace Battleships.ViewModels
             if(res == MessageBoxResult.Yes)
             {
                 Field.GenerateBoats();
+                ShowResult = false;
+                EditMode = false;
                 OnPropertyChanged(nameof(Field));
             }
         }
@@ -193,11 +227,12 @@ namespace Battleships.ViewModels
         public void ToggleEdit()
         {
             EditMode = !EditMode;
+            ShowResult = false;
         }
 
         private void OnPropertyChanged([CallerMemberName]string property = null)
         {
-            PropertyChanged.Invoke(this, new PropertyChangedEventArgs(property));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(property));
         }
     }
 }

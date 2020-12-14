@@ -40,16 +40,19 @@ namespace Battleships
 
         public void OnFieldChange(object obj, PropertyChangedEventArgs args)
         {
-            if((args.PropertyName == "Field" || args.PropertyName == "ShowResult" || args.PropertyName == "EditMode") 
-                && PlayingField.Field != null)
+            if (args.PropertyName == "Field" || args.PropertyName == "ShowResult" || args.PropertyName == "EditMode")
             {
-                if (PlayingField.EditMode)
+                PlayingFieldGrid.Children.Clear();
+                if (PlayingField.Field != null)
                 {
-                    GenerateEditPlayingField();
-                }
-                else
-                {
-                    GeneratePlayingField(PlayingField.ShowResult);
+                    if (PlayingField.EditMode)
+                    {
+                        GenerateEditPlayingField();
+                    }
+                    else
+                    {
+                        GeneratePlayingField(PlayingField.ShowResult);
+                    }
                 }
             }
         }
@@ -132,10 +135,9 @@ namespace Battleships
         /// </summary>
         private void GenerateEditPlayingField()
         {
-            PlayingFieldGrid.Children.Clear(); // Clearing previous buttons
-
+            PlayingFieldGrid.Children.Clear();
             int fieldSize = PlayingField.Field.SideLength;
-            
+
             PlayingFieldGrid.Columns = fieldSize;
             PlayingFieldGrid.Rows = fieldSize;
 
@@ -172,8 +174,8 @@ namespace Battleships
         /// <param name="showResult">Shows results to game when set to true</param>
         private void GeneratePlayingField(bool showResult = false)
         {
-            int fieldSize = PlayingField.Field.SideLength;
             PlayingFieldGrid.Children.Clear();
+            int fieldSize = PlayingField.Field.SideLength;
 
             // 1 is added to the grid to display BoatBit counts
             PlayingFieldGrid.Columns = fieldSize + 1;
@@ -192,7 +194,7 @@ namespace Battleships
                         Margin = new Thickness(1)
                     };
 
-                    
+
                     Position pos = new Position(x, y);
 
                     // Checks if result should be shown
@@ -232,6 +234,8 @@ namespace Battleships
                 };
                 PlayingFieldGrid.Children.Add(textBlock);
             }
+
+            ShowBoatTypes();
         }
 
         /// <summary>
@@ -240,7 +244,7 @@ namespace Battleships
         /// <param name="button">Button, of whitch the result should be displayed</param>
         /// <param name="position">Buttons position on the field</param>
         /// <returns></returns>
-        private bool ShowBtnResult(Button button, Position position)
+        private void ShowBtnResult(Button button, Position position)
         {
             // Sets color of button to black, if a ship was found on it's position
             foreach (BoatBit boatBit in PlayingField.Field.Boats.SelectMany(x => x.BoatBits))
@@ -251,73 +255,15 @@ namespace Battleships
                 }
             }
 
-            // Sets buttons position to either green or red for the players guessed positions
-            foreach (Position pos in PlayingField.SelectedPositions.Where(x => x == position))
+            if (PlayingField.SelectedPositions.Any(x => x == position))
             {
-                // Checks if the guessed position exists in the boats list
-                if (PlayingField.Field.Boats.SelectMany(x => x.BoatBits).Any(y => y.XYPosition == pos))
-                {
-                    // sets button color to green to indicate the answer was correct
-                    button.Background = Brushes.Green;
-                    return true;
-                }
-                else
-                {
-                    // sets button color to red to indicate the answer was incorrect
-                    button.Background = Brushes.Red;
-                    return true;
-                }
+                button.Background =
+                    PlayingField.Field.Boats.SelectMany(x => x.BoatBits).Any(y => y.XYPosition == position) ?
+                    Brushes.Green : Brushes.Red;
             }
 
-            return false;
+
         }
-
-
-        // "Validate" button click function
-        private void ShowResultBtn_Click(object sender, RoutedEventArgs e)
-        {
-            GeneratePlayingField(true);
-            ShowResultBtn.Visibility = Visibility.Hidden;
-        }
-
-
-        // "Generate" button click function
-        private void GenerateButton_Click(object sender, RoutedEventArgs e)
-        {
-            PlayingField.Field.GenerateBoats();
-            EnablePlayMode();
-        }
-
-
-        /// <summary>
-        /// Enables playing mode/disables editor mode
-        /// </summary>
-        private void EnablePlayMode()
-        {
-            PlayingField.SelectedPositions.Clear();
-
-            _btnToggleOn = false;
-            EditorGrid.Visibility = Visibility.Hidden;
-            ShowResultBtn.Visibility = Visibility.Visible;
-            ShowBoatTypes();
-            GeneratePlayingField();
-        }
-
-
-        /// <summary>
-        /// Enables editor mode/disables playing mode
-        /// </summary>
-        private void EnableEditorMode()
-        {
-            PlayingField.SelectedPositions.Clear();
-
-            EditorGrid.Visibility = Visibility.Visible;
-            ShowResultBtn.Visibility = Visibility.Hidden;
-            BoatTypeGrid.Children.Clear();
-            GenerateEditPlayingField();
-        }
-
-
 
         public void ShowBoatTypes()
         {

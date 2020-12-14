@@ -12,6 +12,11 @@ namespace Tests
     [TestFixture]
     class PdfGeneratorTests
     {
+        /// <summary>
+        /// This Test contains no asserts. It generates a Document,
+        /// that can be evaluated manually. The Document is saved under 
+        /// C:\Users\[username]\Documents\battleships_[timestamp].pdf
+        /// </summary>
         [Test]
         public void TestGen()
         {
