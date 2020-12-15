@@ -57,7 +57,7 @@ namespace BusinessLayer
         /// </summary>
         /// <param name="boat">Boat that is to be validated</param>
         /// <returns>If the boats position is valid or not</returns>
-        private bool ValidateBoatPos(Boat boat)
+        public bool ValidateBoatPos(Boat boat)
         {
             List<Position> boatPositions = new List<Position>();
             foreach (BoatBit boatBit in boat.BoatBits)
