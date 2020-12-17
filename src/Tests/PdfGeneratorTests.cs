@@ -14,7 +14,7 @@ namespace Tests
     {
         /// <summary>
         /// This Test contains no asserts. It generates a Document,
-        /// that can be evaluated manually. The Document is saved under 
+        /// that must be evaluated manually. The Document is saved under 
         /// C:\Users\[username]\Documents\battleships_[timestamp].pdf
         /// </summary>
         [Test]
@@ -29,6 +29,7 @@ namespace Tests
             field.CreateBoat(new Position(5, 6), new Position(5, 6));
             field.CreateBoat(new Position(5, 0), new Position(5, 3));
             field.CreateBoat(new Position(3, 1), new Position(3, 1));
+            field.CreateBoat(new Position(2, 0), new Position(2, 0));
 
             PdfGenerator.Generate(path, field);
 
