@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -32,31 +33,27 @@ namespace Battleships
         {
             InitializeComponent();
             PlayingField = new PlayingFieldViewModel();
-            FieldSizeBox.Text = "7";
-            PlayingField.Field = new Field(7);
+            PlayingField.PropertyChanged += OnFieldChange;
             DataContext = PlayingField;
-            GenerateEditPlayingField();
         }
 
 
-        // Validates field size typed in FieldSizeBox
-        private void FieldSizeBox_TextChanged(object sender, TextChangedEventArgs e)
+        public void OnFieldChange(object obj, PropertyChangedEventArgs args)
         {
-            string sizeText = FieldSizeBox.Text;
-            int numOut;
-            if (int.TryParse(sizeText, out numOut) && numOut <= 20 && numOut >= 5) // field size must be between 5 and 20
+            if (args.PropertyName == "Field" || args.PropertyName == "ShowResult" || args.PropertyName == "EditMode")
             {
-                PlayingField.Field = new Field(numOut);
-
-                FieldSizeBox.Foreground = Brushes.Black;
-                PlayingField.Field.Boats.Clear();
-                PlayingField.SelectedPositions.Clear();
-                GenerateEditPlayingField();
-                GC.Collect();
-            }
-            else
-            {
-                FieldSizeBox.Foreground = Brushes.Red;
+                PlayingFieldGrid.Children.Clear();
+                if (PlayingField.Field != null)
+                {
+                    if (PlayingField.EditMode)
+                    {
+                        GenerateEditPlayingField();
+                    }
+                    else
+                    {
+                        GeneratePlayingField(PlayingField.ShowResult);
+                    }
+                }
             }
         }
 
@@ -69,14 +66,14 @@ namespace Battleships
         private void FieldBtn_Click(Position position, object sender)
         {
             // Checks if delete mode is active and if the playing field is in editor mode
-            if (PlayingField.DeleteState == true && PlayingField.EditorMode)
+            if (PlayingField.DeleteState == true && PlayingField.EditMode)
             {
                 // Deletes the boat on the clicked buttons position
                 PlayingField.Field.DeleteBoat(position);
                 GenerateEditPlayingField();
                 _btnToggleOn = false;
             }
-            else if (!PlayingField.EditorMode) // If playing field is not in edit mode
+            else if (!PlayingField.EditMode) // If playing field is not in edit mode
             {
                 BtnGameClick((Button)sender, position);
             }
@@ -138,10 +135,9 @@ namespace Battleships
         /// </summary>
         private void GenerateEditPlayingField()
         {
-            PlayingFieldGrid.Children.Clear(); // Clearing previous buttons
-
+            PlayingFieldGrid.Children.Clear();
             int fieldSize = PlayingField.Field.SideLength;
-            
+
             PlayingFieldGrid.Columns = fieldSize;
             PlayingFieldGrid.Rows = fieldSize;
 
@@ -178,8 +174,8 @@ namespace Battleships
         /// <param name="showResult">Shows results to game when set to true</param>
         private void GeneratePlayingField(bool showResult = false)
         {
-            int fieldSize = PlayingField.Field.SideLength;
             PlayingFieldGrid.Children.Clear();
+            int fieldSize = PlayingField.Field.SideLength;
 
             // 1 is added to the grid to display BoatBit counts
             PlayingFieldGrid.Columns = fieldSize + 1;
@@ -197,7 +193,8 @@ namespace Battleships
                         Height = Width,
                         Margin = new Thickness(1)
                     };
-                    
+
+
                     Position pos = new Position(x, y);
 
                     // Checks if result should be shown
@@ -221,7 +218,7 @@ namespace Battleships
                 // Adds TextBlock showing count of BoatBits in row
                 TextBlock textBlock = new TextBlock
                 {
-                    Text = PlayingField.Field.YBoatCount(y).ToString(),
+                    Text = PlayingField.Field.GetNumOfBoatsInColumn(y).ToString(),
                     TextAlignment = TextAlignment.Center
                 };
                 PlayingFieldGrid.Children.Add(textBlock);
@@ -232,27 +229,14 @@ namespace Battleships
             {
                 TextBlock textBlock = new TextBlock
                 {
-                    Text = PlayingField.Field.XBoatCount(x).ToString(),
+                    Text = PlayingField.Field.GetNumOfBoatsInRow(x).ToString(),
                     TextAlignment = TextAlignment.Center
                 };
                 PlayingFieldGrid.Children.Add(textBlock);
             }
+
+            ShowBoatTypes();
         }
-
-
-        // Button to toggle game from "edit" and "play" mode
-        private void CreateButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (PlayingField.EditorMode == true)
-            {
-                EnablePlayMode();
-            }
-            else
-            {
-                EnableEditorMode();
-            }
-        }
-
 
         /// <summary>
         /// Function to color button according to the result
@@ -260,7 +244,7 @@ namespace Battleships
         /// <param name="button">Button, of whitch the result should be displayed</param>
         /// <param name="position">Buttons position on the field</param>
         /// <returns></returns>
-        private bool ShowBtnResult(Button button, Position position)
+        private void ShowBtnResult(Button button, Position position)
         {
             // Sets color of button to black, if a ship was found on it's position
             foreach (BoatBit boatBit in PlayingField.Field.Boats.SelectMany(x => x.BoatBits))
@@ -271,77 +255,15 @@ namespace Battleships
                 }
             }
 
-            // Sets buttons position to either green or red for the players guessed positions
-            foreach (Position pos in PlayingField.SelectedPositions.Where(x => x == position))
+            if (PlayingField.SelectedPositions.Any(x => x == position))
             {
-                // Checks if the guessed position exists in the boats list
-                if (PlayingField.Field.Boats.SelectMany(x => x.BoatBits).Any(y => y.XYPosition == pos))
-                {
-                    // sets button color to green to indicate the answer was correct
-                    button.Background = Brushes.Green;
-                    return true;
-                }
-                else
-                {
-                    // sets button color to red to indicate the answer was incorrect
-                    button.Background = Brushes.Red;
-                    return true;
-                }
+                button.Background =
+                    PlayingField.Field.Boats.SelectMany(x => x.BoatBits).Any(y => y.XYPosition == position) ?
+                    Brushes.Green : Brushes.Red;
             }
 
-            return false;
+
         }
-
-
-        // "Validate" button click function
-        private void ShowResultBtn_Click(object sender, RoutedEventArgs e)
-        {
-            GeneratePlayingField(true);
-            ShowResultBtn.Visibility = Visibility.Hidden;
-        }
-
-
-        // "Generate" button click function
-        private void GenerateButton_Click(object sender, RoutedEventArgs e)
-        {
-            PlayingField.Field.GenerateBoats();
-            EnablePlayMode();
-        }
-
-
-        /// <summary>
-        /// Enables playing mode/disables editor mode
-        /// </summary>
-        private void EnablePlayMode()
-        {
-            PlayingField.SelectedPositions.Clear();
-
-            CreateButton.Content = "Edit mode";
-            PlayingField.EditorMode = false;
-            _btnToggleOn = false;
-            EditorGrid.Visibility = Visibility.Hidden;
-            ShowResultBtn.Visibility = Visibility.Visible;
-            ShowBoatTypes();
-            GeneratePlayingField();
-        }
-
-
-        /// <summary>
-        /// Enables editor mode/disables playing mode
-        /// </summary>
-        private void EnableEditorMode()
-        {
-            PlayingField.SelectedPositions.Clear();
-
-            CreateButton.Content = "Start game";
-            PlayingField.EditorMode = true;
-            EditorGrid.Visibility = Visibility.Visible;
-            ShowResultBtn.Visibility = Visibility.Hidden;
-            BoatTypeGrid.Children.Clear();
-            GenerateEditPlayingField();
-        }
-
-
 
         public void ShowBoatTypes()
         {

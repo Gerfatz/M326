@@ -23,15 +23,16 @@ namespace BusinessLayer.DocumentGeneration
 
             Table table = new Table(field.SideLength + 1);
 
-            for (int i = 0; i < field.SideLength; i++)
+            for (sbyte i = 0; i < field.SideLength; i++)
             {
-                for (int j = 0; j < field.SideLength; j++)
+                for (sbyte j = 0; j < field.SideLength; j++)
                 {
                     Cell cell = new Cell();
                     cell.SetWidth(30);
                     cell.SetHeight(30);
-                    Position pos = new Position((byte)j, (byte)i);
-                    BoatBit boatBit = field.Boats.SelectMany(b => b.BoatBits).SingleOrDefault(bb => bb.XYPosition == pos);
+
+                    Position pos = new Position(j, i);
+                    BoatBit boatBit = field.Boats.SelectMany(b => b.BoatBits).SingleOrDefault(bb => bb.XYPosition == pos && bb.WasFound);
                     
                     if (boatBit != null)
                     {

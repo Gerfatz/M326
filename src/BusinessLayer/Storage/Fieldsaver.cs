@@ -11,7 +11,6 @@ namespace BusinessLayer.Storage
 {
     public class Fieldsaver
     {
-
         private readonly string _folderName;
 
         private const string dictionaryFileName = "Dictionary.json";
@@ -29,16 +28,26 @@ namespace BusinessLayer.Storage
         /// <remarks>
         /// The GUID can be used to access single fields. The string is the name of the field
         /// </remarks>
+        /// <exception cref="ApplicationException"></exception>
         public Dictionary<Guid, string> GetAllFields()
         {
-            EnsureAppdataExists();
+            //Ensuring the Folder exists
+            EnsureFolderExists();
 
-            string pathToFile = Path.Combine(PathToApplicationData, dictionaryFileName);
+            string pathToFile = Path.Combine(PathToFolder, dictionaryFileName);
 
+            //Reading and deserializing the contents of the file
             using FileStream stream = new FileStream(pathToFile, FileMode.OpenOrCreate, FileAccess.Read);
             using StreamReader reader = new StreamReader(stream);
 
-            return JsonConvert.DeserializeObject<Dictionary<Guid, string>>(reader.ReadToEnd()) ?? new Dictionary<Guid, string>();
+            try
+            {
+                return JsonConvert.DeserializeObject<Dictionary<Guid, string>>(reader.ReadToEnd()) ?? new Dictionary<Guid, string>();
+            }
+            catch
+            {
+                throw new ApplicationException("An error occured while loading the playing fields");
+            }
         }
 
         /// <summary>
@@ -48,25 +57,29 @@ namespace BusinessLayer.Storage
         /// <remarks>
         /// in order to obtain the GUIDs of a field, call <see cref="GetAllFields"/>
         /// </remarks>
-        /// 
         /// <exception cref="FileNotFoundException"/>
+        /// <exception cref="ApplicationException"/>
         public Field GetField(Guid id)
         {
             string pathToFile = GetPathForId(id);
 
+            //making sure the file and folder exists
+            EnsureFolderExists();
             ThrowIfFileNotExists(pathToFile);
 
+            //Reading and Deserializing
             using FileStream fs = new FileStream(pathToFile, FileMode.Open, FileAccess.Read);
             BinaryFormatter formatter = new BinaryFormatter();
-            object data = formatter.Deserialize(fs);
 
-            if (data is Field)
+            //Checking if the type is correct
+            try
             {
+                object data = formatter.Deserialize(fs);
                 return data as Field;
             }
-            else
+            catch
             {
-                throw new ApplicationException("The data in the file couldn't be deserialized, because the datatype is wrong");
+                throw new ApplicationException("The data in the file couldn't be deserialized");
             }
         }
 
@@ -81,13 +94,15 @@ namespace BusinessLayer.Storage
         /// </remarks>
         public void Save(Field data, Guid id)
         {
-            EnsureAppdataExists();
-
             string pathToFile = GetPathForId(id);
+
+            //Ensuring Folder exists
+            EnsureFolderExists();
+
             using FileStream fs = new FileStream(pathToFile, FileMode.OpenOrCreate, FileAccess.ReadWrite);
-
+            
+            //Serializing
             BinaryFormatter formatter = new BinaryFormatter();
-
             formatter.Serialize(fs, data);
 
             UpdateDictionaryFile(id, data.Name);
@@ -113,51 +128,70 @@ namespace BusinessLayer.Storage
         public void Delete(Guid guid)
         {
             string pathToFile = GetPathForId(guid);
-            ThrowIfFileNotExists(pathToFile);
-            UpdateDictionaryFile(guid, null);
+            UpdateDictionaryFile(guid, "", true);
 
-            File.Delete(pathToFile);
+            //If the File does not exist, we don't have to delete in anymore, nor throw an excepiton
+            if (File.Exists(pathToFile))
+            {
+                File.Delete(pathToFile);
+            }
         }
 
         /// <summary>
         /// Updates the name of a field or creates a new entry in the dictionary file
         /// </summary>
         /// <param name="id">Id of the Field</param>
-        /// <param name="name">New name</param>
-        private void UpdateDictionaryFile(Guid id, string name)
+        /// <param name="name">Name of the Field</param>
+        /// <param name="delete">Should the entry with the id be deleted</param>
+        private void UpdateDictionaryFile(Guid id, string name, bool delete = false)
         {
-            string pathToFile = Path.Combine(PathToApplicationData, dictionaryFileName);
+            string pathToFile = Path.Combine(PathToFolder, dictionaryFileName);
 
+            //Ensuring the File exists
             if (!File.Exists(pathToFile))
             {
                 File.Create(pathToFile).Close();
             }
 
-            Dictionary<Guid, string> fields = JsonConvert.DeserializeObject<Dictionary<Guid, string>>(File.ReadAllText(pathToFile)) ?? new Dictionary<Guid, string>();
+            Dictionary<Guid, string> fields = null;
 
-            if(name == null)
+            try
             {
+                //Loading current contents
+                fields = JsonConvert.DeserializeObject<Dictionary<Guid, string>>(File.ReadAllText(pathToFile)) ?? new Dictionary<Guid, string>();
+            }
+            catch (IOException)
+            {
+                throw new ApplicationException("A file is currently in use by another programm, the field might have not been saved correctly");
+            }
+
+            if (delete)
+            {
+                //Delete
                 fields.Remove(id);
             }
             else
             {
                 if (fields.ContainsKey(id))
                 {
+                    //Update
                     fields[id] = name;
                 }
                 else
                 {
+                    //Create
                     fields.Add(id, name);
                 }
             }
 
+            //Save to file
             File.WriteAllText(pathToFile, JsonConvert.SerializeObject(fields));
         }
 
         /// <summary>
         /// returns the path of the applications appdata directory
         /// </summary>
-        private string PathToApplicationData => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), _folderName);
+        private string PathToFolder => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), _folderName);
 
         /// <summary>
         /// returns the filepath for a field
@@ -167,7 +201,7 @@ namespace BusinessLayer.Storage
         /// <returns></returns>
         private string GetPathForId(Guid id)
         {
-            return Path.Combine(PathToApplicationData, id.ToString() + ".bin");
+            return Path.Combine(PathToFolder, id.ToString() + ".bin");
         }
 
         /// <summary>
@@ -179,17 +213,16 @@ namespace BusinessLayer.Storage
         {
             if (!File.Exists(path))
             {
-                throw new FileNotFoundException($"The file with the name {path} could not be found", path);
+                throw new ApplicationException("A file could not be found");
             }
         }
 
-        private void EnsureAppdataExists()
+        private void EnsureFolderExists()
         {
-            if (!Directory.Exists(PathToApplicationData))
+            if (!Directory.Exists(PathToFolder))
             {
-                Directory.CreateDirectory(PathToApplicationData);
+                Directory.CreateDirectory(PathToFolder);
             }
         }
-
     }
 }

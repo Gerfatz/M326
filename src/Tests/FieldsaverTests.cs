@@ -51,11 +51,11 @@ namespace Tests
 
             Guid id2 = fieldsaver.Create(field);
 
-            Dictionary<Guid, string> dict = fieldsaver.GetAllFields();
+            List<FieldSavingModel> models = fieldsaver.GetAllFields();
 
-            Assert.IsTrue(dict.ContainsKey(id1) && dict.ContainsKey(id2));
-            Assert.IsTrue(dict[id1] == "GetAll_Test_1");
-            Assert.IsTrue(dict[id2] == "GetAll_Test_2");
+            Assert.IsTrue(models.Any(m => m.Id == id1) && models.Any(m => m.Id == id2));
+            Assert.IsTrue(models.First(m => m.Id == id1).Name == "GetAll_Test_1");
+            Assert.IsTrue(models.First(m => m.Id == id2).Name == "GetAll_Test_2");
         }
 
         [Test]
