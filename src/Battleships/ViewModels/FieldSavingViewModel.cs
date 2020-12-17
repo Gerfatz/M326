@@ -6,7 +6,7 @@ using System.Text;
 
 namespace BusinessLayer.Storage
 {
-    public class FieldSavingModel : INotifyPropertyChanged
+    public class FieldSavingViewModel : INotifyPropertyChanged
     {
         private Guid _id;
         private string _name;

@@ -2,11 +2,9 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
 using System.Windows;
 using Battleships.Commands;
 using BusinessLayer;
@@ -20,14 +18,22 @@ namespace Battleships.ViewModels
     {
         private readonly Fieldsaver _fieldsaver;
         private Field _field;
-        private FieldSavingModel _selectedField;
-        private ObservableCollection<FieldSavingModel> _fields;
+        private FieldSavingViewModel _selectedField;
+        private ObservableCollection<FieldSavingViewModel> _fields;
         private int _sideLength = 7;
         private bool _showResult = false;
         private bool _editMode = true;
 
         // Properties
-        public bool? DeleteState { get; set; } = false; // State of "delete" checkbox
+
+        /// <summary>
+        /// Represents the switch between deletion and addition mode when editing the playing field
+        /// </summary>
+        public bool? DeleteState { get; set; } = false;
+
+        /// <summary>
+        /// The currently selected <see cref="Field"/>. This is the real field that contains the boats
+        /// </summary>
         public Field Field {
             get => _field;
             private set
@@ -35,11 +41,17 @@ namespace Battleships.ViewModels
                 _field = value;
                 OnPropertyChanged();
             }
-        } // Created field from business layer
+        }
 
-        public List<Position> SelectedPositions { get; set; } // List of positions selected by the user
+        /// <summary>
+        /// The positions selected by the user
+        /// </summary>
+        public List<Position> SelectedPositions { get; set; }
 
-        public ObservableCollection<FieldSavingModel> Fields 
+        /// <summary>
+        /// List of all fields with their names and GUID
+        /// </summary>
+        public ObservableCollection<FieldSavingViewModel> Fields 
         {
             get => _fields;
             private set
@@ -49,31 +61,46 @@ namespace Battleships.ViewModels
             }
         }
 
-        public FieldSavingModel SelectedField
+        /// <summary>
+        /// The selected Field in context of saving and loading. Only contains the name and GUID
+        /// </summary>
+        public FieldSavingViewModel SelectedField
         {
             get => _selectedField;
             set
             {
-                if(_selectedField != null)
+                if (value != null)
                 {
-                    _selectedField.PropertyChanged -= UpdateFieldName;
-                }
-                _selectedField = value;
-
-                if(value != null)
-                {
-                    _selectedField.PropertyChanged += UpdateFieldName;
-                    Field = _fieldsaver.GetField(_selectedField.Id);
+                    try
+                    {
+                        Field = _fieldsaver.GetField(value.Id);
+                        value.PropertyChanged += UpdateFieldName;
+                    }
+                    catch (ApplicationException ex)
+                    {
+                        ShowErrorMessage(ex.Message, "Error while loading the field");
+                        return;
+                    }
                 }
                 else
                 {
                     Field = null;
                 }
 
+                if (_selectedField != null)
+                {
+                    _selectedField.PropertyChanged -= UpdateFieldName;
+                }
+
+                _selectedField = value;
+
                 OnPropertyChanged();
             }
         }
 
+        /// <summary>
+        /// The side length of the field
+        /// </summary>
         public int SideLength
         {
             get => _sideLength;
@@ -92,6 +119,9 @@ namespace Battleships.ViewModels
             }
         }
 
+        /// <summary>
+        /// Switch for showing the results in playing mode
+        /// </summary>
         public bool ShowResult
         {
             get => _showResult;
@@ -102,6 +132,9 @@ namespace Battleships.ViewModels
             }
         }
 
+        /// <summary>
+        /// Switches between edit and playing mode
+        /// </summary>
         public bool EditMode
         {
             get => _editMode;
@@ -114,20 +147,57 @@ namespace Battleships.ViewModels
             }
         }
 
+        /// <summary>
+        /// Is the game currently in playing mode. Used for activating UI Elements
+        /// </summary>
         public bool GameMode => !_editMode;
 
         //Commands
+
+        /// <summary>
+        /// Command to save the current <see cref="Field"/>
+        /// </summary>
         public ActionCommand SaveCommand { get; set; }
+
+        /// <summary>
+        /// Command to create a new playing field, and setting it as the currently selected
+        /// </summary>
         public ActionCommand NewFieldCommand { get; set; }
+
+        /// <summary>
+        /// Toggles the <see cref="ShowResult"/> property
+        /// </summary>
         public ActionCommand ShowResultCommand { get; set; }
+
+        /// <summary>
+        /// Toggles between edit and playing mode
+        /// </summary>
         public ActionCommand ToggleEditCommand { get; set; }
+
+        /// <summary>
+        /// Opens a file dialog and exports the currently selected <see cref="Field"/> as a Pdf to the selected location
+        /// </summary>
         public ActionCommand ExportCommand { get; set; }
+
+        /// <summary>
+        /// Command to delete the currently selected <see cref="Field"/>
+        /// </summary>
         public ActionCommand DeleteCommand { get; set; }
+
+        /// <summary>
+        /// Command to overwrite all current boats in <see cref="Field"/>, and replaces the with randomly generated ones.
+        /// After that it switches to game mode.
+        /// </summary>
         public ActionCommand GenerateCommand { get; set; }
 
+        /// <summary>
+        /// Event that is triggered when a public property of this object changes
+        /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
 
-        // Constructor
+        /// <summary>
+        /// Creates a new instance, and loads a list of all saved playing fields
+        /// </summary>
         public PlayingFieldViewModel()
         {
             SelectedPositions = new List<Position>();
@@ -141,25 +211,66 @@ namespace Battleships.ViewModels
             GenerateCommand = new ActionCommand(Generate, IsFieldNotNull);
 
             _fieldsaver = new Fieldsaver();
-            Fields = new ObservableCollection<FieldSavingModel>(_fieldsaver.GetAllFields());
+
+            try
+            {
+                Fields = ConvertSavingDictToViewModel(_fieldsaver.GetAllFields());
+            }
+            catch (ApplicationException ex)
+            {
+                ShowErrorMessage(ex.Message, "Error while loading fields");
+            }
         }
 
+        /// <summary>
+        /// Saves the current field
+        /// </summary>
         public void Save()
         {
-            _fieldsaver.Save(_field, _selectedField.Id);
+            try
+            {
+                _fieldsaver.Save(_field, _selectedField.Id);
+            }
+            catch (ApplicationException ex)
+            {
+                MessageBox.Show(ex.Message, "Error while saving", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
+        /// <summary>
+        /// Creates a new field
+        /// </summary>
         public void NewField()
         {
             Field field = new Field(_sideLength);
             field.Name = "New Field";
-            Guid newFieldGuid = _fieldsaver.Create(field);
-            Fields = new ObservableCollection<FieldSavingModel>(_fieldsaver.GetAllFields());
+            Guid newFieldGuid;
 
-            SelectedField = Fields.First(f => f.Id == newFieldGuid);
+            try
+            {
+                newFieldGuid = _fieldsaver.Create(field);
+            }
+            catch(ApplicationException ex)
+            {
+                ShowErrorMessage(ex.Message, "Error while creating new field");
+                return;
+            }
+
+            FieldSavingViewModel newModel = new FieldSavingViewModel
+            {
+                Id = newFieldGuid,
+                Name = field.Name
+            };
+
+            Fields.Add(newModel);
+
+            SelectedField = newModel;
             Field = field;
         }
 
+        /// <summary>
+        /// Opens a file dialog and exports the current field as a .pdf file
+        /// </summary>
         public void Export()
         {
             SaveFileDialog dialog = new SaveFileDialog();
@@ -182,17 +293,32 @@ namespace Battleships.ViewModels
             }
         }
 
+        /// <summary>
+        /// Asks the user for confirmation and deletes the current field
+        /// </summary>
         public void Delete()
         {
             MessageBoxResult res = MessageBox.Show("Are you sure you want to delete this game. This action is irreversible", "Confirm", MessageBoxButton.YesNo, MessageBoxImage.Question);
             if(res == MessageBoxResult.Yes)
             {
-                _fieldsaver.Delete(_selectedField.Id);
+                try
+                {
+                    _fieldsaver.Delete(_selectedField.Id);
+                }
+                catch (ApplicationException ex)
+                {
+                    ShowErrorMessage(ex.Message, "Error while deleting field");
+                }
+
                 Fields.Remove(_selectedField);
                 SelectedField = null;
             }
         }
 
+        /// <summary>
+        /// Overwrites the boats in the current field and replaces them with randomly generated ones.
+        /// Switches to playing mode
+        /// </summary>
         public void Generate()
         {
             MessageBoxResult res = MessageBox.Show("This will overwrite the current Field. Are you sure you want to confinue?", "Confirm", MessageBoxButton.YesNo, MessageBoxImage.Warning);
@@ -206,11 +332,20 @@ namespace Battleships.ViewModels
             }
         }
 
+        /// <summary>
+        /// Checks if a field is currently selected. Used for <see cref="ActionCommand.CanExecute(object)"/>
+        /// </summary>
+        /// <returns></returns>
         public bool IsFieldNotNull()
         {
             return Field != null;
         }
 
+        /// <summary>
+        /// This method is called, when the name of the selected <see cref="FieldSavingViewModel"/> changes
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="ev"></param>
         public void UpdateFieldName(object sender, PropertyChangedEventArgs ev)
         {
             if(ev.PropertyName == "Name")
@@ -219,20 +354,45 @@ namespace Battleships.ViewModels
             }
         }
 
+        /// <summary>
+        /// Toggles to the show results mode
+        /// </summary>
         public void ShowRes()
         {
             ShowResult = true;
         }
 
+        /// <summary>
+        /// Switches between edit and playing mode
+        /// </summary>
         public void ToggleEdit()
         {
             EditMode = !EditMode;
             ShowResult = false;
         }
 
+        /// <summary>
+        /// Should be called when a property of this object changes
+        /// </summary>
+        /// <param name="property"></param>
         private void OnPropertyChanged([CallerMemberName]string property = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(property));
+        }
+
+        private ObservableCollection<FieldSavingViewModel> ConvertSavingDictToViewModel(Dictionary<Guid, string> dict)
+        {
+            return new ObservableCollection<FieldSavingViewModel>(
+                dict.Select(d => new FieldSavingViewModel 
+                { 
+                    Id = d.Key,
+                    Name = d.Value 
+                }));
+        }
+
+        private void ShowErrorMessage(string message, string title)
+        {
+            MessageBox.Show(message, title, MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 }

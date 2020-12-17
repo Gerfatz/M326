@@ -30,6 +30,7 @@ namespace BusinessLayer.DocumentGeneration
                     Cell cell = new Cell();
                     cell.SetWidth(30);
                     cell.SetHeight(30);
+
                     Position pos = new Position(j, i);
                     BoatBit boatBit = field.Boats.SelectMany(b => b.BoatBits).SingleOrDefault(bb => bb.XYPosition == pos && bb.WasFound);
                     
