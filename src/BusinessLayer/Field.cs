@@ -90,10 +90,13 @@ namespace BusinessLayer
         }
 
 
-        // REMINDER: Change after Darios push from his home PC
+        /// <summary>
+        /// Deletes a boat that is at the given position
+        /// </summary>
+        /// <param name="position">Position where a BoatBit should be</param>
+        /// <returns>true if removed, false if no boat is at this position</returns>
         public bool DeleteBoat(Position position)
         {
-            //BoatBit boatBit = _boats.SelectMany(x => x.BoatBits).FirstOrDefault(x => x.XYPosition == position);
             Boat boat = _boats.FirstOrDefault(x => x.BoatBits.Any(y => y.XYPosition == position));
 
             if (boat == null)

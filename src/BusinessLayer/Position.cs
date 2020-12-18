@@ -21,17 +21,17 @@ namespace BusinessLayer
 
         public static bool operator ==(Position pos1, Position pos2)
         {
-            return pos1.X == pos2.X && pos1.Y == pos2.Y;
+            return pos1.Equals(pos2);
         }
 
         public static bool operator !=(Position pos1, Position pos2)
         {
-            return pos1.X != pos2.X || pos2.Y == pos1.Y;
+            return !pos1.Equals(pos2);
         }
 
         public bool Equals(Position pos)
         {
-            return pos == this;
+            return this.Equals(pos as object);
         }
 
         public override bool Equals(object obj)

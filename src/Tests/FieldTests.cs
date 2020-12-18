@@ -66,5 +66,51 @@ namespace Tests
             Assert.IsFalse(field.CreateBoat(new Position(5, 2), new Position(5, 4)));
             Assert.IsTrue(field.CreateBoat(new Position(1, 1), new Position(1, 1)));
         }
+
+        [Test]
+        public void TestGetBoatSizes()
+        {
+            Field field = new Field(7);
+
+            //One Boat with length 1
+            field.CreateBoat(new Position(0, 0), new Position(0, 0));
+
+            //Two Boats with length 2
+            field.CreateBoat(new Position(2, 0), new Position(2, 1));
+            field.CreateBoat(new Position(0, 2), new Position(0, 3));
+
+
+            //One Boat with length 4
+            field.CreateBoat(new Position(4, 0), new Position(4, 3));
+
+            Dictionary<int, int> res = field.GetBoatSizes();
+
+            Assert.AreEqual(res[1], 1);
+            Assert.AreEqual(res[2], 2);
+            Assert.AreEqual(res[4], 1);
+        }
+
+        [Test]
+        public void TestDeleteBoat()
+        {
+            Field field = new Field(7);
+
+            field.CreateBoat(new Position(0, 0), new Position(0, 0));
+            bool result = field.DeleteBoat(new Position(0, 0));
+
+            Assert.AreEqual(field.Boats.Count, 0);
+            Assert.IsTrue(result);
+        }
+
+        public void TestDeleteBoatFalsePosition()
+        {
+            Field field = new Field(7);
+
+            field.CreateBoat(new Position(0, 0), new Position(0, 0));
+            bool result = field.DeleteBoat(new Position(0, 1));
+
+            Assert.AreEqual(field.Boats.Count, 1);
+            Assert.IsFalse(result);
+        }
     }
 }
